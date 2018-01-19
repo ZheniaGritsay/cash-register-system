@@ -1,0 +1,45 @@
+.well {
+    box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.2), 0 4px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.card {
+    border-color: #17a2b8;
+}
+
+.card > .card-header {
+    color: #fff;
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
+
+.btn:focus, .btn.focus {
+    box-shadow: none;
+}
+
+.btn:not([disabled]):not(.disabled):active, .btn:not([disabled]):not(.disabled).active,
+.show > .btn.dropdown-toggle {
+    box-shadow: none;
+}
+
+.hidden {
+    display: none;
+}
+
+.page-link {
+    border-color: #a0b1ff;
+}
+
+.page-link:focus {
+    color: #007bff;
+    text-decoration: none;
+    background-color: #fff;
+    border-color: #a0b1ff;
+}
+
+.page-link:hover {
+    border-color: #a0b1ff;
+}
+
+.input-group {
+    margin-bottom: 10px;
+}

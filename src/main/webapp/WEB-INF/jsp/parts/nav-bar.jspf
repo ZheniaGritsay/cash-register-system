@@ -1,0 +1,63 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="${pageContext.request.contextPath}/">
+                    <i class="fa fa-home mr-1"></i>
+                    <fmt:message key="label.home" bundle="${bundle}"/>
+                    <span class="sr-only">(current)</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="${pageContext.request.contextPath}/app/home/control-panel">
+                    <fmt:message key="label.control.panel" bundle="${bundle}"/>
+                </a>
+            </li>
+        </ul>
+        <form class="form-inline my-2 my-lg-0 mr-md-3">
+            <select class="form-control" id="language" name="language" onchange="submit()">
+                <option value="en_US" ${language == 'en_US' ? 'selected' : ''}>
+                    <fmt:message key="label.english" bundle="${bundle}"/>
+                </option>
+                <option value="ru_RU" ${language == 'ru_RU' ? 'selected' : ''}>
+                    <fmt:message key="label.russian" bundle="${bundle}"/>
+                </option>
+            </select>
+        </form>
+        <c:choose>
+            <c:when test="${not empty userId}">
+                <form class="form-inline my-2 my-lg-0">
+                    <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2"
+                            onclick="window.location.href='${pageContext.request.contextPath}/app/edit-account'">
+                        <i class="fa fa-user"></i> <fmt:message key="label.account" bundle="${bundle}"/>
+                    </button>
+                </form>
+                <form class="form-inline my-2 my-lg-0">
+                    <button class="btn btn-outline-success my-2 my-sm-0"
+                            onclick="window.location.href='${pageContext.request.contextPath}/app/logout'">
+                        <i class="fa fa-pencil-square"></i> <fmt:message key="button.log.out" bundle="${bundle}"/>
+                    </button>
+                </form>
+            </c:when>
+            <c:otherwise>
+                <form class="form-inline my-2 my-lg-0">
+                    <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2"
+                            onclick="window.location.href='${pageContext.request.contextPath}/login'">
+                        <i class="fa fa-sign-in"></i> <fmt:message key="button.log.in" bundle="${bundle}"/>
+                    </button>
+                </form>
+                <form class="form-inline my-2 my-lg-0">
+                    <button class="btn btn-outline-success my-2 my-sm-0"
+                            onclick="window.location.href='${pageContext.request.contextPath}/registration'">
+                        <i class="fa fa-sign-out"></i> <fmt:message key="button.register" bundle="${bundle}"/>
+                    </button>
+                </form>
+            </c:otherwise>
+        </c:choose>
+    </div>
+</nav>

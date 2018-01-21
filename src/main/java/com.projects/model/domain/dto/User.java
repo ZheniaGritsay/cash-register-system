@@ -2,11 +2,20 @@ package com.projects.model.domain.dto;
 
 import com.projects.model.domain.Entity;
 import com.projects.model.domain.constant.Role;
+import com.projects.model.validation.annotation.NotNull;
+import com.projects.model.validation.annotation.Pattern;
 
 public class User extends Entity {
+    @Pattern(regex = {"^\\w{2,}$", "^\\S+$"}, message = "error.empty")
     private final String login;
+
+    @Pattern(regex = "^.{5,}$", message = "error.should.be.greater")
     private final String password;
+
+    @NotNull(message = "error.not.null")
     private final Role role;
+
+    @NotNull(message = "error.not.null")
     private final Employee employee;
 
     public User(Long id, String login, String password, Role role, Employee employee) {

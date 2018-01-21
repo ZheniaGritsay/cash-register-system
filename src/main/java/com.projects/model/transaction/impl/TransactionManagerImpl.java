@@ -34,6 +34,8 @@ public class TransactionManagerImpl implements TransactionManager {
             throw new TransactionException("no transaction started");
 
         transaction.commit();
+        releaseResources();
+
     }
 
     @Override
@@ -43,6 +45,7 @@ public class TransactionManagerImpl implements TransactionManager {
             throw new TransactionException("no transaction started");
 
         transaction.rollback();
+        releaseResources();
     }
 
     @Override
@@ -79,5 +82,9 @@ public class TransactionManagerImpl implements TransactionManager {
         TransactionObject transaction = new TransactionObjectImpl(connectionHolder);
         getOrCreateCurrentContext().setTransaction(transaction);
         return transaction;
+    }
+
+    private void releaseResources() {
+        contexts.remove(Thread.currentThread());
     }
 }

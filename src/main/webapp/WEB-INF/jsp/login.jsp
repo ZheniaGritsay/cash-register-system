@@ -31,12 +31,23 @@
 <div class="container mt-sm-5">
 </div>
 <div class="row">
-    <div class="col-sm-4"></div>
+    <div class="col-sm-4">
+        <form class="form-inline" style="margin-left: 65%">
+            <select class="form-control" id="language" name="language" onchange="submit()">
+                <option value="en_US" ${language == 'en_US' ? 'selected' : ''}>
+                    <fmt:message key="label.english" bundle="${bundle}"/>
+                </option>
+                <option value="ru_RU" ${language == 'ru_RU' ? 'selected' : ''}>
+                    <fmt:message key="label.russian" bundle="${bundle}"/>
+                </option>
+            </select>
+        </form>
+    </div>
     <div class="col-sm-4">
         <div class="card">
             <div class="card-header"><b><fmt:message key="title.login" bundle="${bundle}"/></b></div>
             <div class="card-body">
-                <c:if test="${errors}">
+                <c:if test="${not empty error}">
                     <div class="alert alert-danger">
                         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                         <fmt:message key="error.login.or.password" bundle="${bundle}"/>
@@ -58,7 +69,7 @@
                     <input type="submit" class="btn btn-outline-primary"
                            value="<fmt:message key="button.log.in" bundle="${bundle}" />">
                     <button type="button" class="btn btn-outline-primary" style="margin-left: 10px"
-                            onclick="location.href='${pageContext.request.contextPath}/app/sign-up'">
+                            onclick="location.href='${pageContext.request.contextPath}/app/registration'">
                         <fmt:message key="button.register" bundle="${bundle}"/>
                     </button>
                 </form>

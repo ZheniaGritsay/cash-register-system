@@ -13,4 +13,8 @@ public class InternalServerException extends Exception {
     public InternalServerException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    public InternalServerException(Throwable cause) {
+        super(cause);
+    }
 }

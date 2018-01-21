@@ -31,7 +31,7 @@ public class JdbcReportDaoImpl extends JdbcAbstractDaoImpl<Report, Long> impleme
             pStatement.setTimestamp(4, Timestamp.valueOf(report.getCreationDate()));
             pStatement.setInt(5, report.getType().ordinal());
         } catch (SQLException e) {
-
+            logger.error("failed setting prepared statement for create: " + e.getMessage());
         }
     }
 
@@ -41,7 +41,7 @@ public class JdbcReportDaoImpl extends JdbcAbstractDaoImpl<Report, Long> impleme
             preparedStatementForCreate(pStatement, report);
             pStatement.setLong(6, report.getId());
         } catch (SQLException e) {
-
+            logger.error("failed setting prepared statement for update: " + e.getMessage());
         }
     }
 
@@ -64,7 +64,7 @@ public class JdbcReportDaoImpl extends JdbcAbstractDaoImpl<Report, Long> impleme
                 reportList.add(report);
             }
         } catch (SQLException e) {
-
+            logger.error("failed parse result set: " + e.getMessage());
         }
 
         return reportList;
@@ -93,8 +93,8 @@ public class JdbcReportDaoImpl extends JdbcAbstractDaoImpl<Report, Long> impleme
             appended = pStatement.execute();
 
         } catch (SQLException e) {
-            logger.error("failed to append a check to the report", e);
-            throw new DaoException("unable to append a check: " + e.getMessage());
+            logger.error("failed to append a check to the report: " + e.getMessage());
+            throw new DaoException("unable to append a check", e);
         }
 
         return appended;
@@ -113,8 +113,8 @@ public class JdbcReportDaoImpl extends JdbcAbstractDaoImpl<Report, Long> impleme
             removed = pStatement.execute();
 
         } catch (SQLException e) {
-            logger.error("failed to remove a check from the report", e);
-            throw new DaoException("unable to remove a check: " + e.getMessage());
+            logger.error("failed to remove a check from the report: " + e.getMessage());
+            throw new DaoException("unable to remove a check", e);
         }
 
         return removed;

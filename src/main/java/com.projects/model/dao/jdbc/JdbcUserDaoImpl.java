@@ -33,7 +33,7 @@ public class JdbcUserDaoImpl extends JdbcAbstractDaoImpl<User, Long> implements 
             pStatement.setInt(3, user.getRole().ordinal());
             pStatement.setLong(4, user.getEmployee().getId());
         } catch (SQLException e) {
-
+            logger.error("failed setting prepared statement for create: " + e.getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ public class JdbcUserDaoImpl extends JdbcAbstractDaoImpl<User, Long> implements 
             preparedStatementForCreate(pStatement, user);
             pStatement.setLong(5, user.getId());
         } catch (SQLException e) {
-
+            logger.error("failed setting prepared statement for update: " + e.getMessage());
         }
     }
 
@@ -71,7 +71,7 @@ public class JdbcUserDaoImpl extends JdbcAbstractDaoImpl<User, Long> implements 
                 userList.add(user);
             }
         } catch (SQLException e) {
-
+            logger.error("failed parse result set: " + e.getMessage());
         }
 
         return userList;
@@ -79,14 +79,15 @@ public class JdbcUserDaoImpl extends JdbcAbstractDaoImpl<User, Long> implements 
 
     @Override
     public User getByLogin(String login) throws DaoException {
-        User user;
-        try(Connection connection = getConnection();
-            PreparedStatement pStatement = connection.prepareStatement(getSQLQueries().getQuery(SQLQueries.GET_BY_LOGIN))) {
-            pStatement.setString(1, login);
-            user = parseResultSet(pStatement.executeQuery()).get(0);
-        } catch (SQLException e) {
-            logger.error("failed to get a user by login", e);
-            throw new DaoException("unable to get a user by login: " + e.getMessage());
+        User user = null;
+        List<User> list = preparedStatementExec(c -> {
+            PreparedStatement pStatement = c.prepareStatement(getSQLQueries().getQuery(SQLQueries.GET_BY_LOGIN));
+                pStatement.setString(1, login);
+                return pStatement;
+        });
+
+        if (!list.isEmpty()) {
+            user = list.get(0);
         }
 
         return user;

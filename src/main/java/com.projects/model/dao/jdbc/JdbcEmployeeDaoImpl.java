@@ -1,6 +1,7 @@
 package com.projects.model.dao.jdbc;
 
 import com.projects.model.dao.EmployeeDao;
+import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.constant.Position;
 import com.projects.model.domain.dto.Employee;
 import com.projects.util.SQLQueries;
@@ -31,7 +32,7 @@ public class JdbcEmployeeDaoImpl extends JdbcAbstractDaoImpl<Employee, Long> imp
             pStatement.setDouble(4, employee.getSalary());
             pStatement.setLong(5, employee.getPosition().ordinal());
         } catch (SQLException e) {
-
+            logger.error("failed setting prepared statement for create: " + e.getMessage());
         }
     }
 
@@ -41,7 +42,7 @@ public class JdbcEmployeeDaoImpl extends JdbcAbstractDaoImpl<Employee, Long> imp
             preparedStatementForCreate(pStatement, employee);
             pStatement.setLong(6, employee.getId());
         } catch (SQLException e) {
-
+            logger.error("failed setting prepared statement for update: " + e.getMessage());
         }
     }
 
@@ -62,13 +63,25 @@ public class JdbcEmployeeDaoImpl extends JdbcAbstractDaoImpl<Employee, Long> imp
                 employeeList.add(employee);
             }
         } catch (SQLException e) {
-
+            logger.error("failed parse result set: " + e.getMessage());
         }
         return employeeList;
     }
 
     @Override
-    protected Connection getConnection() {
-        return super.getConnection();
+    public Employee getByFirstAndLastName(String firstName, String lastName) throws DaoException {
+        Employee employee = null;
+        List<Employee> list = preparedStatementExec(c -> {
+            PreparedStatement ps = c.prepareStatement(getSQLQueries().getQuery(SQLQueries.GET_BY_FIRST_AND_LAST_NAME));
+            ps.setString(1, firstName);
+            ps.setString(2, lastName);
+            return ps;
+        });
+
+        if (!list.isEmpty()) {
+            employee = list.get(0);
+        }
+
+        return employee;
     }
 }

@@ -60,7 +60,7 @@ public class ProductServiceImpl extends AbstractServiceImpl<ProductDao, Product,
                 try (FileInputStream fis = new FileInputStream(emptyImagePath)) {
 
                     byte[] bytes = new byte[(int) fis.getChannel().size()];
-                    while (fis.read(bytes) != -1) ;
+                    while (fis.read(bytes) != -1);
 
                     emptyImageBytes = bytes;
 

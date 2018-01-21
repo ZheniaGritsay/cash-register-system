@@ -34,8 +34,15 @@ public class CheckServiceImpl extends AbstractServiceImpl<CheckDao, Check, Long>
     @Override
     public List<Check> findAllByReportId(long reportId) throws DaoException {
         List<Check> checksByReportId = dao.getAllByReportId(reportId);
-        logger.info("retrieved check by product id");
+        logger.info("retrieved checks by product id");
         return checksByReportId;
+    }
+
+    @Override
+    public List<Check> findAllByEmployeeId(long employeeId) throws DaoException {
+        List<Check> checksByEmployeeId = dao.getAllByEmployeeId(employeeId);
+        logger.info("retrieved checks by employee id");
+        return checksByEmployeeId;
     }
 
     @Override

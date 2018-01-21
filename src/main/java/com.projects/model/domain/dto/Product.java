@@ -2,13 +2,28 @@ package com.projects.model.domain.dto;
 
 import com.projects.model.domain.Entity;
 import com.projects.model.domain.constant.QuantityType;
+import com.projects.model.validation.annotation.DecimalMin;
+import com.projects.model.validation.annotation.Min;
+import com.projects.model.validation.annotation.NotNull;
+import com.projects.model.validation.annotation.Pattern;
 
 public class Product extends Entity {
+    @Pattern(regex = {"^\\w+$", "^[^\\s]+$"}, message = "error.empty")
     private final String title;
+
+    @Min(message = "error.lt.zero")
     private final Long code;
+
+    @DecimalMin(message = "error.lt.zero")
     private final Double price;
+
+    @NotNull(message = "error.not.null")
     private final QuantityType quantityType;
+
+    @Min(message = "error.not.null")
     private final Integer boughtQuantity;
+
+    @Min(value = 1, message = "error.should.be.greater")
     private final Integer quantityOnStock;
     private byte[] image;
 

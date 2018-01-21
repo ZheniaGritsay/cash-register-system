@@ -37,7 +37,7 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
             ds.setPassword(properties.getProperty("password"));
 
         } catch (IOException e) {
-
+            logger.error("failed to set up connection pool: " + e.getMessage());
         }
         return ds;
     }
@@ -52,14 +52,14 @@ public class ConnectionFactoryImpl implements ConnectionFactory {
             connection = (Connection) Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {Connection.class},
                     new ConnectionHandler(connectionPool.getConnection()));
         } catch (SQLException e) {
-
+            logger.error("failed to fetch connection from pool: " + e.getMessage());
         }
 
         return connection;
     }
 
     private boolean checkTransaction() {
-        return TransactionManagerService.getConnectionHolder().isTransactionActive();
+        return TransactionManagerService.isTransactionExists();
     }
 
     private Connection getTransactionConnection() {

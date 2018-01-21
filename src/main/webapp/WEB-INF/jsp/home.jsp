@@ -12,7 +12,6 @@
 <head>
     <meta charset="UTF-8">
     <%@include file="parts/set-lang.jspf" %>
-    <!-- TODO: title -->
     <title><fmt:message key="title.main" bundle="${bundle}"/></title>
     <%--<%@include file="parts/header.jspf"%>--%>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"
@@ -34,11 +33,11 @@
                 <input type="hidden" id="employeeId" value="<c:out value="${employeeId}"/>">
                 <div class="input-group">
                     <input type="text" class="form-control" id="employeeFirstName" name="employeeFirstName"
-                           value="<c:out value="${employeeFirstName}"/>">
+                           value="<c:out value="${employeeFirstName}"/>" disabled>
                 </div>
                 <div class="input-group">
                     <input type="text" class="form-control" id="employeeLastName" name="employeeLastName"
-                           value="<c:out value="${employeeLastName}"/>">
+                           value="<c:out value="${employeeLastName}"/>" disabled>
                 </div>
             </c:if>
         </div>
@@ -62,7 +61,7 @@
                                                 style=" width: 100%"></div>
                     <div class="card-footer">
                         <form>
-                            <div class="form-row">
+                            <div class="form-row mb-md-1">
                                 <label class="col-sm-4" for="quantity">
                                     <fmt:message key="label.quantity" bundle="${bundle}"/>
                                 </label>
@@ -74,13 +73,18 @@
                                     <fmt:message key="label.price" bundle="${bundle}"/>
                                 </label>
                                 <input type="number" class="form-control col-sm-8" id="price" name="price"
-                                       value="<c:out value="${product.price}"/>">
+                                       value="<c:out value="${product.price}"/>" disabled>
                             </div>
                         </form>
                         <input id="id" name="id" type="hidden" value="<c:out value="${product.id}"/>">
+                        <input type="hidden" name="title" id="title"
+                               value="<c:out value="${product.title}"/>">
+                        <input type="hidden" name="code" id="code"
+                               value="<c:out value="${product.code}"/>">
                         <input type="hidden" name="quantityStock" id="quantityStock"
                                value="<c:out value="${product.quantityOnStock}"/>">
-                        <input type="hidden" name="img" id="img" value="<c:out value="${product.image}"/>">
+                        <input type="hidden" name="quantityType" id="quantityType"
+                               value="<c:out value="${product.quantityType}"/>">
                         <button type="button" onclick="addToHandler(event)"
                                 class="btn btn-outline-primary mt-sm-3">
                             <fmt:message key="button.add" bundle="${bundle}"/>
@@ -102,7 +106,7 @@
                                                 style=" width: 100%"></div>
                     <div class="card-footer">
                         <form>
-                            <div class="form-row">
+                            <div class="form-row mb-md-1">
                                 <label class="col-sm-4" for="quantity-2">
                                     <fmt:message key="label.quantity" bundle="${bundle}"/>
                                 </label>
@@ -114,13 +118,18 @@
                                     <fmt:message key="label.price" bundle="${bundle}"/>
                                 </label>
                                 <input type="number" class="form-control col-sm-8" id="price-2" name="price"
-                                       value="<c:out value="${product.price}"/>">
+                                       value="<c:out value="${product.price}"/>" disabled>
                             </div>
                         </form>
                         <input id="id-2" name="id" type="hidden" value="<c:out value="${product.id}"/>">
+                        <input type="hidden" name="title" id="title-2"
+                               value="<c:out value="${product.title}"/>">
+                        <input type="hidden" name="code" id="code-2"
+                               value="<c:out value="${product.code}"/>">
                         <input type="hidden" name="quantityStock" id="quantityStock-2"
                                value="<c:out value="${product.quantityOnStock}"/>">
-                        <input type="hidden" name="img" id="img-2" value="<c:out value="${product.image}"/>">
+                        <input type="hidden" name="quantityType" id="quantityType-2"
+                               value="<c:out value="${product.quantityType}"/>">
                         <button type="button" onclick="addToHandler(event)"
                                 class="btn btn-outline-primary mt-sm-3">
                             <fmt:message key="button.add" bundle="${bundle}"/>
@@ -144,7 +153,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Check closed</h5>
+                <h5 class="modal-title"><fmt:message key="label.check.closed"/></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -152,8 +161,24 @@
             <div class="modal-body">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" data-dismiss="modal">Close</button>
-                <%--<button type="button" class="btn btn-primary">Save changes</button>--%>
+                <button type="button" class="btn btn-success" data-dismiss="modal"><fmt:message key="label.close" bundle="${bundle}"/></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="productUnavailable" tabindex="-1" role="dialog" aria-labelledby="productUnavailableLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color: red"><fmt:message key="label.unavailable" bundle="${bundle}"/></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="color: red">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal"><fmt:message key="label.close" bundle="${bundle}"/></button>
             </div>
         </div>
     </div>

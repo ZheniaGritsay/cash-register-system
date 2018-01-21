@@ -18,15 +18,15 @@ import com.projects.model.validation.Validator;
 import com.projects.model.validation.Violation;
 import com.projects.model.validation.exception.ValidationException;
 import com.projects.model.validation.impl.ValidatorFactoryImpl;
+import com.projects.util.Encryptor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class RegistrationCommand implements Command {
     private final Logger logger = LogManager.getLogger();
@@ -44,8 +44,6 @@ public class RegistrationCommand implements Command {
         String firstName = request.getParameter("firstName");
         String lastName = request.getParameter("lastName");
         String email = request.getParameter("email");
-        String salary = request.getParameter("salary");
-        String position = request.getParameter("position");
 
         try {
             if (userService.findByLogin(login) != null) {
@@ -65,8 +63,8 @@ public class RegistrationCommand implements Command {
                 .firstName(firstName)
                 .lastName(lastName)
                 .email(email)
-                .salary(Double.parseDouble(salary))
-                .position(Position.valueOf(position))
+                .salary(0.00)
+                .position(Position.CASHIER)
                 .build();
 
         User user = new User(0L, login, password, Role.USER, employee);
@@ -87,21 +85,21 @@ public class RegistrationCommand implements Command {
             userViolations.forEach(v -> request.setAttribute(v.getField() + "Error", v.getMessage()));
             request.setAttribute("errors", true);
 
-            List<String> userInfo = Arrays.asList(login, password, firstName, lastName, email, salary, position);
+            Map<String, String> userInfo = new HashMap<>();
+            userInfo.put("login", login);
+            userInfo.put("password", password);
+            userInfo.put("firstName", firstName);
+            userInfo.put("lastName", lastName);
+            userInfo.put("email", email);
 
-            userViolations.stream().map(Violation::getField).forEach(field -> {
-                if (!userInfo.contains(field)) {
-                    int valIndex = userInfo.indexOf(field);
-                    request.setAttribute(field, userInfo.get(valIndex));
-                }
-            });
+            Stream.concat(userViolations.stream(), employeeViolations.stream())
+                    .map(Violation::getField).forEach(field -> {
+                        if (userInfo.containsKey(field)) {
+                            userInfo.remove(field);
+                        }
+                    });
 
-            employeeViolations.stream().map(Violation::getField).forEach(field -> {
-                if (!userInfo.contains(field)) {
-                    int valIndex = userInfo.indexOf(field);
-                    request.setAttribute(field, userInfo.get(valIndex));
-                }
-            });
+            userInfo.forEach(request::setAttribute);
 
             return PagesView.REGISTRATION;
         }
@@ -109,8 +107,10 @@ public class RegistrationCommand implements Command {
         TransactionManager tm = TransactionManagerService.getTransactionManager();
         try {
             tm.begin();
-            employeeService.create(employee);
-            user = userService.create(user);
+            employee = employeeService.create(employee);
+            String encryptedPass = Encryptor.encrypt(user.getPassword(), Encryptor.SHA256);
+            user = new User(user.getId(), user.getLogin(), encryptedPass, user.getRole(), employee);
+            userService.create(user);
             tm.commit();
         } catch (DaoException | TransactionException e) {
             try {
@@ -123,10 +123,6 @@ public class RegistrationCommand implements Command {
             throw new InternalServerException();
         }
 
-        HttpSession session = request.getSession();
-        session.setAttribute("userId", user.getId());
-        session.setAttribute("userRole", user.getRole());
-        session.setAttribute("employeePosition", user.getEmployee().getPosition());
         request.setAttribute("redirect", "true");
 
         return PagesView.REGISTRATION;

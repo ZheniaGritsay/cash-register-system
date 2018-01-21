@@ -2,16 +2,29 @@ package com.projects.model.domain.dto;
 
 import com.projects.model.domain.Entity;
 import com.projects.model.domain.constant.ReportType;
+import com.projects.model.validation.annotation.DecimalMin;
+import com.projects.model.validation.annotation.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class Report extends Entity {
+    @NotNull(message = "error.not.null")
     private final LocalDateTime since;
+
+    @NotNull(message = "error.not.null")
     private final LocalDateTime until;
+
+    @NotNull(message = "error.not.null")
     private final List<Check> checks;
+
+    @DecimalMin(message = "error.lt.zero")
     private final Double totalSum;
+
+    @NotNull(message = "error.not.null")
     private final LocalDateTime creationDate;
+
+    @NotNull(message = "error.not.null")
     private final ReportType type;
 
     public Report(Builder builder) {

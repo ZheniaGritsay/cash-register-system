@@ -38,8 +38,8 @@ public class ValidatorImpl implements Validator {
                 method = clazz.getMethod(methodName, (Class<?>[]) null);
                 fieldVal = method.invoke(object, (Object[]) null);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                logger.error("failed to handle a method", e);
-                throw new ValidationException("unable to handle method: " + e.getMessage());
+                logger.error("failed to handle a method: " + e.getMessage());
+                throw new ValidationException("unable to handle method", e);
             }
 
             for (Annotation a : entry.getValue()) {
@@ -63,8 +63,8 @@ public class ValidatorImpl implements Validator {
             method = annotation.annotationType().getMethod(attribute, (Class<?>[]) null);
             retVal = method.invoke(annotation, (Object[]) null);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            logger.error("failed to get an attribute value", e);
-            throw new ValidationException("unable to get an attribute value: " + e.getMessage());
+            logger.error("failed to get an attribute value: " + e.getMessage());
+            throw new ValidationException("unable to get an attribute value", e);
         }
 
         return retVal;
@@ -98,7 +98,7 @@ public class ValidatorImpl implements Validator {
     private boolean fitsToAttributes(Annotation annotation, List<Method> attributes, Object value) throws ValidationException {
         if (attributes.isEmpty()) {
             if (NotNull.class == annotation.annotationType())
-                return value == null;
+                return value != null;
             else if (AssertFalse.class == annotation.annotationType())
                 return !((Boolean) value);
             else if (AssertTrue.class == annotation.annotationType())
@@ -158,7 +158,13 @@ public class ValidatorImpl implements Validator {
             if (((String) value).length() > ((Number) attributeVal).intValue())
                 result = true;
         } else if ("regex".equals(attribute.getName())) {
-            if (((String) value).matches((String) attributeVal))
+            String[] regexes = (String[]) attributeVal;
+            int regexesCount = 0;
+            for (String regex : regexes) {
+                if (((String) value).matches(regex))
+                    regexesCount++;
+            }
+            if (regexesCount == regexes.length)
                 result = true;
         }
         return result;
@@ -194,8 +200,8 @@ public class ValidatorImpl implements Validator {
 
     private String getMethodName(Field field) {
         String retVal = field.getName();
-        char first = retVal.charAt(0);
-        retVal = METHOD_PREFIX_GET + String.valueOf(first).toUpperCase() + retVal.substring(1);
+        char firstChar = retVal.charAt(0);
+        retVal = METHOD_PREFIX_GET + String.valueOf(firstChar).toUpperCase() + retVal.substring(1);
         return retVal;
     }
 }

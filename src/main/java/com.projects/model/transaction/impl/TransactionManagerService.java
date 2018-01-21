@@ -23,4 +23,9 @@ public class TransactionManagerService {
 
         return holder;
     }
+
+    public static boolean isTransactionExists() {
+        ConnectionHolder ch = connectionHolder.get();
+        return ch != null && ch.isTransactionActive();
+    }
 }

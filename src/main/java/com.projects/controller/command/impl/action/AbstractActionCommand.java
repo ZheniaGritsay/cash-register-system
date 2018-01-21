@@ -169,6 +169,7 @@ public abstract class AbstractActionCommand<T extends Entity> implements Command
         messages.put("close", Internationalization.getText("label.close"));
         messages.put("closeCheck", Internationalization.getText("label.close.check"));
         messages.put("noResults", Internationalization.getText("label.no.results"));
+        messages.put("unavailable", Internationalization.getText("label.unavailable"));
 
         return messages;
     }
@@ -214,6 +215,7 @@ public abstract class AbstractActionCommand<T extends Entity> implements Command
 
             response.setHeader("Content-Type", "application/json");
             response.getWriter().write(commonJson);
+            
             return true;
         }
 

@@ -6,7 +6,7 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD})
 @Documented
 public @interface Pattern {
-    String regex();
+    String[] regex();
 
     String message() default "";
 }

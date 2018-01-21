@@ -11,6 +11,8 @@ public interface CheckService extends AbstractService<Check, Long> {
     List<Check> findAllByDate(String date) throws DaoException;
 
     List<Check> findAllByReportId(long reportId) throws DaoException;
+    
+    List<Check> findAllByEmployeeId(long employeeId) throws DaoException;
 
     boolean addProduct(long checkId, long productId, int boughtQuantity) throws DaoException;
 

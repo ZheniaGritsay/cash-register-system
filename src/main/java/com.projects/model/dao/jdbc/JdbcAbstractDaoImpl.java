@@ -42,8 +42,8 @@ public abstract class JdbcAbstractDaoImpl<T extends Entity, PK extends Number> i
             resultSet.next();
             id = resultSet.getInt(1);
         } catch (SQLException e) {
-            logger.error("failed to create entity", e);
-            throw new DaoException("unable to create: " + e.getMessage());
+            logger.error("failed to create an entity: " + e.getMessage());
+            throw new DaoException("unable to create an entity", e);
         }
         return id;
     }
@@ -64,8 +64,8 @@ public abstract class JdbcAbstractDaoImpl<T extends Entity, PK extends Number> i
             }
 
         } catch (SQLException e) {
-            logger.error("failed to get an entity by id", e);
-            throw new DaoException("unable to get by id: " + e.getMessage());
+            logger.error("failed to get an entity by id: " + e.getMessage());
+            throw new DaoException("unable to get by id", e);
         }
         return entity;
     }
@@ -80,8 +80,8 @@ public abstract class JdbcAbstractDaoImpl<T extends Entity, PK extends Number> i
             updated = pStatement.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            logger.error("failed to update an entity", e);
-            throw new DaoException("unable to update: " + e.getMessage());
+            logger.error("failed to update an entity: " + e.getMessage());
+            throw new DaoException("unable to update", e);
         }
         return updated;
     }
@@ -97,8 +97,8 @@ public abstract class JdbcAbstractDaoImpl<T extends Entity, PK extends Number> i
             removed = pStatement.executeUpdate() > 0;
 
         } catch (SQLException e) {
-            logger.error("failed to delete an entity", e);
-            throw new DaoException("unable to delete: " + e.getMessage());
+            logger.error("failed to delete an entity: " + e.getMessage());
+            throw new DaoException("unable to delete", e);
         }
         return removed;
     }
@@ -113,8 +113,8 @@ public abstract class JdbcAbstractDaoImpl<T extends Entity, PK extends Number> i
             list = parseResultSet(resultSet);
 
         } catch (SQLException e) {
-            logger.error("failed to get all entities", e);
-            throw new DaoException("unable to get all: " + e.getMessage());
+            logger.error("failed to get all entities: " + e.getMessage());
+            throw new DaoException("unable to get all", e);
         }
         return list;
     }
@@ -131,8 +131,8 @@ public abstract class JdbcAbstractDaoImpl<T extends Entity, PK extends Number> i
             list = parseResultSet(pStatement.executeQuery());
 
         } catch (SQLException e) {
-            logger.error("failed to get entities per page", e);
-            throw new DaoException("unable to get per page: " + e.getMessage());
+            logger.error("failed to get entities per page: " + e.getMessage());
+            throw new DaoException("unable to get per page", e);
         }
         return list;
     }
@@ -148,8 +148,8 @@ public abstract class JdbcAbstractDaoImpl<T extends Entity, PK extends Number> i
             count = resultSet.getInt(1);
 
         } catch (SQLException e) {
-            logger.error("failed to count entities", e);
-            throw new DaoException("unable to execute count: " + e.getMessage());
+            logger.error("failed to count entities: " + e.getMessage());
+            throw new DaoException("unable to execute count", e);
         }
         return count;
     }
@@ -162,8 +162,8 @@ public abstract class JdbcAbstractDaoImpl<T extends Entity, PK extends Number> i
             entityList = parseResultSet(pStatement.executeQuery());
 
         } catch (SQLException e) {
-            logger.error("failed to execute prepared statement", e);
-            throw new DaoException("unable to execute prepared statement: " + e.getMessage());
+            logger.error("failed to execute configured prepared statement: " + e.getMessage());
+            throw new DaoException("unable to execute configured prepared statement", e);
         }
         return entityList;
     }

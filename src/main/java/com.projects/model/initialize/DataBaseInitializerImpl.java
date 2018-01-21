@@ -4,6 +4,7 @@ import com.projects.model.dao.exception.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -72,9 +73,10 @@ public class DataBaseInitializerImpl implements DataBaseInitializer {
     private String loadSqlScript(String scriptPath) throws IOException {
         StringBuilder sb = new StringBuilder();
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(scriptPath)) {
-            byte[] bytes = new byte[1024];
-            while (is.read(bytes) != -1) {
-                sb.append(new String(bytes));
+            int b = is.read();
+            while (b != -1) {
+                sb.append((char) b);
+                b = is.read();
             }
         }
 
@@ -86,7 +88,7 @@ public class DataBaseInitializerImpl implements DataBaseInitializer {
         try(InputStream is = getClass().getClassLoader().getResourceAsStream("database.properties")) {
             properties.load(is);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("failed to load properties for database initialization: " + e.getMessage());
         }
 
         return properties;

@@ -39,7 +39,7 @@ public class ReportHolder extends Report {
                     List<Check> checkList = checkDao.getAllByReportId(getId());
                     checkSet = new ArrayList<>(checkList);
                 } catch (DaoException e) {
-
+                    logger.error("failed to get report's checks: " + e.getMessage());
                 }
             }
             return checkSet;

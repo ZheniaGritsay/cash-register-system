@@ -31,29 +31,26 @@
         </form>
         <c:choose>
             <c:when test="${not empty userId}">
-                <form class="form-inline my-2 my-lg-0">
-                    <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2"
-                            onclick="window.location.href='${pageContext.request.contextPath}/app/edit-account'">
-                        <i class="fa fa-user"></i> <fmt:message key="label.account" bundle="${bundle}"/>
+                <form class="form-inline my-2 my-lg-0" action="${pageContext.request.contextPath}/app/edit-account" method="get">
+                    <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2">
+                        <i class="fa fa-user"></i>
+                        <fmt:message key="label.account" bundle="${bundle}"/>
                     </button>
                 </form>
-                <form class="form-inline my-2 my-lg-0">
-                    <button class="btn btn-outline-success my-2 my-sm-0"
-                            onclick="window.location.href='${pageContext.request.contextPath}/app/logout'">
+                <form class="form-inline my-2 my-lg-0" action="${pageContext.request.contextPath}/app/logout" method="get">
+                    <button class="btn btn-outline-success my-2 my-sm-0" id="logout">
                         <i class="fa fa-pencil-square"></i> <fmt:message key="button.log.out" bundle="${bundle}"/>
                     </button>
                 </form>
             </c:when>
             <c:otherwise>
-                <form class="form-inline my-2 my-lg-0">
-                    <button class="btn btn-outline-success my-2 my-sm-0 mr-sm-2"
-                            onclick="window.location.href='${pageContext.request.contextPath}/login'">
+                <form class="form-inline my-2 my-lg-0" action="${pageContext.request.contextPath}/app/login" method="get">
+                    <button type="submit" class="btn btn-outline-success my-2 my-sm-0 mr-sm-2" id="login">
                         <i class="fa fa-sign-in"></i> <fmt:message key="button.log.in" bundle="${bundle}"/>
                     </button>
                 </form>
-                <form class="form-inline my-2 my-lg-0">
-                    <button class="btn btn-outline-success my-2 my-sm-0"
-                            onclick="window.location.href='${pageContext.request.contextPath}/registration'">
+                <form class="form-inline my-2 my-lg-0" action="${pageContext.request.contextPath}/app/registration" method="get">
+                    <button type="submit" class="btn btn-outline-success my-2 my-sm-0" id="registration">
                         <i class="fa fa-sign-out"></i> <fmt:message key="button.register" bundle="${bundle}"/>
                     </button>
                 </form>

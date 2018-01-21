@@ -39,7 +39,7 @@ public class CheckHolder extends Check {
                 try {
                     productList = productDao.getAllByCheckId(getId());
                 } catch (DaoException e) {
-
+                    logger.error("failed to get check's products: " + e.getMessage());
                 }
             }
             return productList;

@@ -39,8 +39,8 @@ public class ConnectionHolderImpl implements ConnectionHolder {
         try {
             currentConnection.close();
         } catch (SQLException e) {
-            logger.error("", e);
-            throw new TransactionException("");
+            logger.error("failed to close transaction connection: " + e.getMessage());
+            throw new TransactionException("unable to close connection", e);
         }
     }
 }

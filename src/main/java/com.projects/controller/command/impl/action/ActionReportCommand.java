@@ -2,6 +2,7 @@ package com.projects.controller.command.impl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.projects.controller.util.PagesView;
 import com.projects.controller.util.i18n.Internationalization;
 import com.projects.controller.util.json.JsonUtil;
 import com.projects.model.dao.exception.DaoException;
@@ -37,7 +38,7 @@ public class ActionReportCommand extends AbstractActionCommand<Report> {
 
     @Override
     String getView() {
-        return "edit-view";
+        return PagesView.EDIT_VIEW;
     }
 
     @Override
@@ -89,11 +90,11 @@ public class ActionReportCommand extends AbstractActionCommand<Report> {
             checkList.add(check);
         }
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm");
         Report report = new Report.Builder()
                 .id(reportTree.path("id").longValue())
                 .since(LocalDateTime.parse(reportTree.path("sinceDate").asText(), dtf))
-                .until(LocalDateTime.parse(reportTree.path("sinceDate").asText(), dtf))
+                .until(LocalDateTime.parse(reportTree.path("untilDate").asText(), dtf))
                 .checks(checkList)
                 .totalSum(reportTree.path("totalSum").doubleValue())
                 .creationDate(LocalDateTime.parse(reportTree.path("creationDate").asText(), dtf))
@@ -111,12 +112,14 @@ public class ActionReportCommand extends AbstractActionCommand<Report> {
         try {
             tm.begin();
 
+            List<Check> checks = report.getChecks();
             report = reportService.create(report);
 
-            for (Check c : report.getChecks()) {
+            for (Check c : checks) {
                 reportService.addCheck(report.getId(), c.getId());
             }
 
+            tm.commit();
         } catch (TransactionException ex) {
             try {
                 tm.rollback();
@@ -139,8 +142,6 @@ public class ActionReportCommand extends AbstractActionCommand<Report> {
 
         Report currentReport = reportService.findById(newReport.getId());
         List<Check> currentCheckProducts = currentReport.getChecks();
-        List<Check> allChecks = Stream.concat(currentCheckProducts.stream(), newReport.getChecks().stream())
-                .collect(Collectors.toList());
 
         TransactionManager tm = TransactionManagerService.getTransactionManager();
         try {
@@ -182,8 +183,13 @@ public class ActionReportCommand extends AbstractActionCommand<Report> {
             report = reportService.findById(Long.parseLong(getRequestParam(request)));
             report.getChecks();
         } else if (path.matches("^/" + getEntitiesName() + "/findAllByType$")) {
-            ReportType type = ReportType.valueOf(request.getParameter("type"));
-            reportList = reportService.findAllByType(type);
+            String typeParam = request.getParameter("type");
+            if (typeParam.equals("ALL")) {
+                reportList = reportService.findAll();
+            } else {
+                ReportType type = ReportType.valueOf(typeParam);
+                reportList = reportService.findAllByType(type);
+            }
         } else {
             return super.getAction(request, response);
         }

@@ -25,10 +25,12 @@ public class SQLQueries {
 
     public static final String GET_BY_LOGIN = "get.by.login";
     public static final String GET_BY_TITLE = "get.by.title";
-    public static final String GET_ALL_BY_TYPE = "get.by.type";
+    public static final String GET_ALL_BY_TYPE = "get.all.by.type";
     public static final String GET_BY_CODE = "get.by.code";
+    public static final String GET_BY_FIRST_AND_LAST_NAME = "get.by.first.and.last.name";
     public static final String GET_BY_CODE_MATCHING = "get.by.code.matching";
     public static final String GET_ALL_BY_DATE = "get.all.by.date";
+    public static final String GET_ALL_BY_EMPLOYEE_ID = "get.all.by.employee.id";
     public static final String GET_ALL_BY_CHECK_ID = "get.all.by.check.id";
     public static final String GET_ALL_BY_REPORT_ID = "get.all.by.report.id";
 

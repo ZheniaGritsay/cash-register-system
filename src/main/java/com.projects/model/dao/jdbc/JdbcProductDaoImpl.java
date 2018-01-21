@@ -34,7 +34,7 @@ public class JdbcProductDaoImpl extends JdbcAbstractDaoImpl<Product, Long> imple
             pStatement.setInt(5, product.getQuantityOnStock());
             pStatement.setBytes(6, product.getImage());
         } catch (SQLException e) {
-
+            logger.error("failed setting prepared statement for create: " + e.getMessage());
         }
     }
 
@@ -44,7 +44,7 @@ public class JdbcProductDaoImpl extends JdbcAbstractDaoImpl<Product, Long> imple
             preparedStatementForCreate(pStatement, product);
             pStatement.setLong(7, product.getId());
         } catch (SQLException e) {
-
+            logger.error("failed setting prepared statement for update: " + e.getMessage());
         }
     }
 
@@ -53,22 +53,22 @@ public class JdbcProductDaoImpl extends JdbcAbstractDaoImpl<Product, Long> imple
         List<Product> productList = new ArrayList<>();
 
         try {
-          while (resultSet.next()) {
-              Product product = new Product.Builder()
-                      .id(resultSet.getLong("id"))
-                      .title(resultSet.getString("title"))
-                      .code(resultSet.getLong("code"))
-                      .price(resultSet.getDouble("price"))
-                      .quantityType(QuantityType.valueOf(resultSet.getString("quantity_type")))
-                      .boughtQuantity(resultSet.getInt("bought_quantity"))
-                      .quantityOnStock(resultSet.getInt("quantity_on_stock"))
-                      .image(resultSet.getBytes("image"))
-                      .build();
+            while (resultSet.next()) {
+                Product product = new Product.Builder()
+                        .id(resultSet.getLong("id"))
+                        .title(resultSet.getString("title"))
+                        .code(resultSet.getLong("code"))
+                        .price(resultSet.getDouble("price"))
+                        .quantityType(QuantityType.valueOf(resultSet.getString("quantity_type")))
+                        .boughtQuantity(resultSet.getInt("bought_quantity"))
+                        .quantityOnStock(resultSet.getInt("quantity_on_stock"))
+                        .image(resultSet.getBytes("image"))
+                        .build();
 
-              productList.add(product);
-          }
+                productList.add(product);
+            }
         } catch (SQLException e) {
-
+            logger.error("failed parse result set: " + e.getMessage());
         }
 
         return productList;
@@ -76,29 +76,26 @@ public class JdbcProductDaoImpl extends JdbcAbstractDaoImpl<Product, Long> imple
 
     @Override
     public List<Product> getByTitle(String title) throws DaoException {
-        List<Product> products;
-        try(Connection connection = getConnection();
-            PreparedStatement pStatement = connection.prepareStatement(getSQLQueries().getQuery(SQLQueries.GET_BY_TITLE))) {
+        List<Product> products = preparedStatementExec(c -> {
+            PreparedStatement pStatement = c.prepareStatement(getSQLQueries().getQuery(SQLQueries.GET_BY_TITLE));
             pStatement.setString(1, title + "%");
-            products = parseResultSet(pStatement.executeQuery());
-        } catch (SQLException e) {
-            logger.error("failed to get a product by title", e);
-            throw new DaoException("unable to get a product by title: " + e.getMessage());
-        }
+            return pStatement;
+        });
 
         return products;
     }
 
     @Override
     public Product getByCode(Long code) throws DaoException {
-        Product product;
-        try(Connection connection = getConnection();
-            PreparedStatement pStatement = connection.prepareStatement(getSQLQueries().getQuery(SQLQueries.GET_BY_CODE))) {
+        Product product = null;
+        List<Product> list = preparedStatementExec(c -> {
+            PreparedStatement pStatement = c.prepareStatement(getSQLQueries().getQuery(SQLQueries.GET_BY_CODE));
             pStatement.setLong(1, code);
-            product = parseResultSet(pStatement.executeQuery()).get(0);
-        } catch (SQLException e) {
-            logger.error("failed to get a product by code", e);
-            throw new DaoException("unable to get a product by code: " + e.getMessage());
+            return pStatement;
+        });
+
+        if (!list.isEmpty()) {
+            product = list.get(0);
         }
 
         return product;

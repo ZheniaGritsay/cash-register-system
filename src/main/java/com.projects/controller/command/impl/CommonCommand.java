@@ -2,6 +2,7 @@ package com.projects.controller.command.impl;
 
 import com.projects.controller.command.Command;
 import com.projects.controller.exception.InternalServerException;
+import com.projects.controller.util.PagesView;
 import com.projects.controller.util.i18n.Internationalization;
 import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.dto.Product;
@@ -33,7 +34,7 @@ public class CommonCommand implements Command {
         String view;
         try {
             if (request.getPathInfo().equals("/home/control-panel")) {
-                view = "control-panel";
+                view = PagesView.CONTROL_PANEL;
             } else {
                 String recordsPerPage = request.getParameter("recordsPerPage");
                 String page = request.getParameter("page");
@@ -53,9 +54,9 @@ public class CommonCommand implements Command {
                     imgs.put(p.getTitle(), imgBase64);
                 }
 
-                String userId = (String) request.getSession().getAttribute("userId");
+                Long userId = (Long) request.getSession().getAttribute("userId");
                 if (userId != null) {
-                    User user = userService.findById(Long.parseLong(userId));
+                    User user = userService.findById(userId);
                     request.setAttribute("employeeId", user.getEmployee().getId());
                     request.setAttribute("employeeFirstName", user.getEmployee().getFirstName());
                     request.setAttribute("employeeLastName", user.getEmployee().getLastName());
@@ -67,7 +68,7 @@ public class CommonCommand implements Command {
                 request.setAttribute("closeCheck", Internationalization.getText("label.close.check"));
                 request.setAttribute("sum", Internationalization.getText("label.sum"));
                 request.setAttribute("entity", "products");
-                view = "home";
+                view = PagesView.HOME;
             }
         } catch (DaoException ex) {
             throw new InternalServerException(ex.getMessage());

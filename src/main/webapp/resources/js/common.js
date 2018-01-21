@@ -46,32 +46,75 @@ const addHandlers = () => {
     });
 };
 
+const saveEmployee = (event) => {
+    let employeeData = event.target.parentElement;
+    let employee = {
+        id: Number.parseInt(employeeData.querySelector('input[id="id"]').value),
+        firstName: $('#firstName').val(),
+        lastName: $('#lastName').val(),
+        email: $('#email').val(),
+        salary: Number.parseFloat($('salary').val()),
+        position: $('#position').val()
+    };
+
+    $.ajax('/app/employees', {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        data: JSON.stringify(employee)
+    }).done((data) => {
+        if (data.errors === undefined) {
+            window.location.href = '/app/employees/view';
+        } else {
+            renderEntity(data, 'form');
+            saveHandler();
+        }
+    }).fail(function (jqXHR) {
+        let html = document.getElementsByTagName('HTML')[0];
+        html.innerHTML = jqXHR.responseText;
+    });
+};
+
 const saveCheck = (event) => {
     let checkId = event.target.parentElement.querySelector('input[id="id"]').value;
     let employeeId = $('#employee-id').val();
-    checkId.id = checkId === '' ? 0 : checkId;
+    checkId.id = checkId === '' ? 0 : Number.parseInt(checkId);
     check.date = formatForJava(new Date($('#date').val()));
-    check.employee.id = employeeId === '' ? 0 : Number.parseInt(employeeId);
-    check.employee.firstName = $('#employee-fn').val();
-    check.employee.lastName = $('#employee-ln').val();
+    check.employee = {
+        id: employeeId === '' ? 0 : Number.parseInt(employeeId),
+        firstName: $('#employee-fn').val(),
+        lastName: $('#employee-ln').val()
+    };
     check.status = $('#status').val();
 
-    let method;
-    if (checkId === '')
-        method = 'POST';
-    else
-        method = 'PUT';
-
+    let method = checkId === '' ? 'POST' : 'PUT';
     $.ajax('/app/checks', {
         method: method,
         data: JSON.stringify(check),
         headers: {'Content-Type': 'application/json'}
-    }).done((data, textStatus) => {
-        if (textStatus === 'success') {
-            processEntityView();
+    }).done((data) => {
+        if (data.errors === undefined) {
+            window.location.href = '/app/checks/view';
         } else {
             renderEntity(data, 'form');
+            saveHandler();
+            if (data.errors.unavailableProducts !== undefined) {
+                let productUnavailableModal = $('#productUnavailable').get(0);
+                let modalBody = productUnavailableModal.querySelector('.modal-body');
+                modalBody.textContent = data.errors.unavailableProducts;
+                let unavailableProducts = data.unavailableProducts;
+                let listElem = document.createElement('UL');
+                for (let i = 0; i < unavailableProducts.length; i++) {
+                    listElem.insertAdjacentHTML('beforeEnd', `
+                        <li>${unavailableProducts[i].title}: ${unavailableProducts[i].code}</li>
+                    `);
+                }
+                modalBody.appendChild(listElem);
+                $(productUnavailableModal).modal('toggle');
+            }
         }
+    }).fail(function (jqXHR) {
+        let html = document.getElementsByTagName('HTML')[0];
+        html.innerHTML = jqXHR.responseText;
     });
 };
 
@@ -90,40 +133,70 @@ const saveProduct = (event) => {
             image = image.slice(index + 1);
         }
 
-        let inputId = $('#save').get(0);
-        inputId = inputId.previousElementSibling;
+        let inputId = event.target.parentElement.querySelector('input[id="id"]').value;
         if (inputId !== '' && image === '') {
-            image = $('#image').val();
+            image = $('#img').val();
         }
-        let id = inputId === '' ? 0 : inputId.value;
+        let parsedId = inputId === '' ? 0 : Number.parseInt(inputId);
         let product = {
-            id: Number.parseInt(id),
+            id: parsedId,
             title: $('#title').val(),
             code: Number.parseInt($('#code').val()),
             price: Number.parseFloat($('#price').val()),
             quantityType: $('#quantityType').val(),
+            boughtQuantity: 0,
             quantityOnStock: Number.parseInt($('#quantityOnStock').val()),
             image: image,
         };
-
         let method = inputId === '' ? 'POST' : 'PUT';
         $.ajax('/app/products',
             {
                 method: method,
                 headers: {'Content-Type': 'application/json'},
                 data: JSON.stringify(product)
-            })
-            .done((data, textStatus) => {
-                if (data.errors === undefined) {
-                    window.location.href = '/app/products/view';
-                }
-            });
+            }).done((data) => {
+            if (data.errors === undefined) {
+                window.location.href = '/app/products/view';
+            } else {
+                let formContent = $('.add-form-content').get(0);
+                formContent.innerHTML = '';
+                productForm(data.product, data.messages, formContent, data.errors);
+                saveHandler();
+            }
+        }).fail(function (jqXHR) {
+            let html = document.getElementsByTagName('HTML')[0];
+            html.innerHTML = jqXHR.responseText;
+        });
     };
     let f = files.length === 0 ? new Blob(['']) : files[0];
     reader.readAsDataURL(f);
 };
 
 const saveReport = (event) => {
+    let reportId = event.target.parentElement.querySelector('input[id="id"]').value;
+    report.id = reportId === '' ? 0 : Number.parseInt(reportId);
+    report.sinceDate = formatForJava(new Date($('#since-date').val()));
+    report.untilDate = formatForJava(new Date($('#until-date').val()));
+    report.creationDate = formatForJava(new Date($('#creation-date').val()));
+    report.totalSum = Number.parseFloat($('#totalSum').val());
+    report.type = $('#type').val();
+
+    let method = reportId === '' ? 'POST' : 'PUT';
+    $.ajax('/app/reports', {
+        method: method,
+        data: JSON.stringify(report),
+        headers: {'Content-Type': 'application/json'}
+    }).done((data, textStatus) => {
+        if (data.errors === undefined) {
+            window.location.href = '/app/reports/view';
+        } else {
+            renderEntity(data, 'form');
+            saveHandler();
+        }
+    }).fail(function (jqXHR) {
+        let html = document.getElementsByTagName('HTML')[0];
+        html.innerHTML = jqXHR.responseText;
+    });
 };
 
 const productSearchHandler = (event) => {
@@ -187,6 +260,9 @@ const productSearchHandler = (event) => {
                 renderEntity(resolvedData, 'card');
             }
         }
+    }).fail(function (jqXHR) {
+        let html = document.getElementsByTagName('HTML')[0];
+        html.innerHTML = jqXHR.responseText;
     });
 };
 
@@ -194,11 +270,11 @@ const checkSearchHandler = (event) => {
     let uri = '/app/checks';
     let inputVal = event.target.value;
     if (inputVal === '') {
-        let reportForm = $('.add-form-content > .card > .card-body > form').get(0);
-        let reportId = reportForm.querySelector('input[id="id"]').value;
-        if (reportId !== '')
-            uri += `/findAllByReportId?reportId=${reportId}`;
-        else
+        if (entity === 'reports') {
+            let reportForm = $('.add-form-content > .card > .card-body > form').get(0);
+            let reportId = reportForm.querySelector('input[id="id"]').value;
+            uri += reportId !== '' ? `/findAllByReportId?reportId=${reportId}` : '';
+        } else
             uri += '';
     } else {
         uri += `/findAllByDate?date=${inputVal}`;
@@ -214,16 +290,20 @@ const checkSearchHandler = (event) => {
                 }
             }
             renderEntity(data, 'table');
+            addHandlers();
         } else {
             let div = $('.container').get(0).firstElementChild.lastElementChild.lastElementChild;
             let table = div.querySelector('table');
             if (table)
                 div.removeChild(table);
 
-            let check = data.check != null ? Array.of(data.check) : [];
-            check = data.checks != null ? data.checks : check.length > 0 ? check : [];
-            reportChecksTable(check, data.messages, div);
+            let reportChecks = data.check != null ? Array.of(data.check) : [];
+            reportChecks = data.checks != null ? data.checks : reportChecks.length > 0 ? reportChecks : [];
+            reportChecksTable(reportChecks, data.messages, div);
         }
+    }).fail(function (jqXHR) {
+        let html = document.getElementsByTagName('HTML')[0];
+        html.innerHTML = jqXHR.responseText;
     });
 };
 
@@ -231,14 +311,17 @@ const onReportTypeChange = (event) => {
     $.ajax('/app/reports/findAllByType?type=' + event.target.value, {method: 'GET'})
         .done((data) => {
             allMessages = data.messages;
-            if (data.reports.length > recordsPerPage) {
-                data = {
-                    reports: data.reports.slice(0, recordsPerPage),
-                    messages: data.messages
-                }
-            }
-            renderEntity(data, 'table');
-        });
+            let report = data.report != null ? Array.of(data.report) : [];
+            report = data.reports != null ? data.reports : report.length > 0 ? report : [];
+            let elem = document.getElementsByClassName('well')[0];
+            if (elem.firstElementChild.tagName === 'TABLE')
+                elem.removeChild(elem.firstElementChild);
+            reportsTable(report, data.messages, elem);
+            addHandlers();
+        }).fail(function (jqXHR) {
+        let html = document.getElementsByTagName('HTML')[0];
+        html.innerHTML = jqXHR.responseText;
+    });
 };
 
 const processPagination = () => {
@@ -436,42 +519,59 @@ const addToHandler = (event) => {
     }
     elem = elem.parentElement;
     let product = {};
-    if (currentURL.match(/.*\/(\/app\/)?(home\/?)|(\/)/g)) {
+    let pattern = `\\/app\\/${entity}\\/view.*`;
+    let regexp = new RegExp(pattern, 'g');
+    if (!currentURL.match(regexp)) {
 
         product.id = Number.parseInt(elem.querySelector('input[name="id"]').value);
-
         let quantity = elem.querySelector('input[name="quantity"]').value;
         quantity = quantity === '' ? 1 : Number.parseInt(quantity);
 
-        if (check.products.some(p => p.id === product.id)) {
-            check.products.forEach(pr => {
-                if (pr.id === product.id) {
-                    pr.boughtQuantity += quantity;
-                    pr.quantityOnStock -= quantity;
-                    product = pr;
-                }
-            });
-        } else {
-            product.price = Number.parseFloat(elem.querySelector('input[name="price"]').value);
-            product.image = elem.querySelector('input[name="img"]').value;
-            product.boughtQuantity = quantity;
-            product.quantityOnStock = Number.parseInt(elem.querySelector('input[name="quantityStock"]').value) - quantity;
-            check.products.push(product);
-        }
+        $.ajax(`/app/products/${product.id}`, {method: 'GET'}).done((data) => {
+            if (data.product.quantityOnStock < quantity) {
+                let productUnavailableModal = $('#productUnavailable').get(0);
+                let modalBody = productUnavailableModal.querySelector('.modal-body');
+                modalBody.textContent = allMessages.productUnavailable;
+                $(productUnavailableModal).modal('toggle');
+                return;
+            }
 
-        if (check.products.length > 0) {
-            check.sum = 0;
-            check.products.forEach(p => {
-                check.sum += p.price * p.boughtQuantity;
-            });
-            check.sum = Math.round(check.sum * 100) / 100;
-            let div = $('.container').get(0).children[0].lastElementChild;
-            if (div.children.length > 0) {
-                div.firstElementChild.querySelector('span').textContent = `Sum: ${check.sum}`;
+            if (check.products.some(p => p.id === product.id)) {
+                check.products.forEach(pr => {
+                    if (pr.id === product.id) {
+                        pr.boughtQuantity += quantity;
+                        pr.quantityOnStock -= quantity;
+                        product = pr;
+                    }
+                });
             } else {
-                let closeCheck = document.createElement('DIV');
-                closeCheck.classList.add('input-group');
-                closeCheck.insertAdjacentHTML('beforeEnd', `
+                let imgElem = elem.parentElement.querySelector('img');
+                let imgSrc = imgElem.getAttribute('src');
+                imgSrc = imgSrc.slice(imgSrc.indexOf(',') + 1);
+                product.title = elem.querySelector('input[name="title"]').value;
+                product.code = Number.parseInt(elem.querySelector('input[name="code"]').value);
+                product.price = Number.parseFloat(elem.querySelector('input[name="price"]').value);
+                product.image = imgSrc;
+                product.quantityType = elem.querySelector('input[name="quantityType"]').value;
+                product.boughtQuantity = quantity;
+                product.quantityOnStock = Number.parseInt(elem.querySelector('input[name="quantityStock"]').value) - quantity;
+                product.quantityOnStock = product.quantityOnStock - quantity;
+                check.products.push(product);
+            }
+
+            if (check.products.length > 0) {
+                check.sum = 0;
+                check.products.forEach(p => {
+                    check.sum += p.price * p.boughtQuantity;
+                });
+                check.sum = Math.round(check.sum * 100) / 100;
+                let div = $('.container').get(0).children[0].lastElementChild;
+                if (div.children.length > 0) {
+                    div.firstElementChild.querySelector('span').textContent = `Sum: ${check.sum}`;
+                } else {
+                    let closeCheck = document.createElement('DIV');
+                    closeCheck.classList.add('input-group');
+                    closeCheck.insertAdjacentHTML('beforeEnd', `
                     <div class="input-group-prepend">
                         <span class="input-group-text">${allMessages.sum}: ${check.sum}</span>
                     </div>
@@ -480,9 +580,13 @@ const addToHandler = (event) => {
                         onclick="closeCheckHandler()">${allMessages.closeCheck}</button>
                 `);
 
-                div.appendChild(closeCheck);
+                    div.appendChild(closeCheck);
+                }
             }
-        }
+        }).fail(function (jqXHR) {
+            let html = document.getElementsByTagName('HTML')[0];
+            html.innerHTML = jqXHR.responseText;
+        });
     } else {
         if (entity === 'checks') {
             let prodInfo = elem.parentElement;
@@ -498,11 +602,7 @@ const addToHandler = (event) => {
                     return;
 
                 let boughtQuantityTd = elem.parentElement.children[4];
-                let quantityOnStockCurrent = Number.parseInt(boughtQuantityTd.nextElementSibling.textContent);
                 enteredQuantity = Number.parseInt(enteredQuantity);
-                if (enteredQuantity > quantityOnStockCurrent) {
-                    enteredQuantity = quantityOnStockCurrent;
-                }
 
                 product = {
                     id: Number.parseInt(productId),
@@ -513,44 +613,57 @@ const addToHandler = (event) => {
                     quantityOnStock: 0,
                     image: prodInfo.querySelector('input[id="productImage"]').value
                 };
-                let boughtNumber = enteredQuantity;
-                if (check.products.some(p => p.id === product.id)) {
-                    check.products.forEach(pr => {
-                        if (pr.id === product.id) {
-                            pr.boughtQuantity += product.boughtQuantity;
-                            product = pr;
-                        }
-                    });
-                } else {
-                    check.products.push(product);
-                }
 
-                boughtQuantityTd.textContent = product.boughtQuantity + '';
-                let quantityOnStock = Number.parseInt(boughtQuantityTd.nextElementSibling.textContent);
-                quantityOnStock -= boughtNumber;
-                boughtQuantityTd.nextElementSibling.textContent = quantityOnStock + '';
-                product.quantityOnStock = quantityOnStock;
+                $.ajax(`/app/products/${product.id}`, {method: 'GET'}).done((data) => {
+                    if (data.product.quantityOnStock < enteredQuantity) {
+                        let productUnavailableModal = $('#productUnavailable').get(0);
+                        let modalBody = productUnavailableModal.querySelector('.modal-body');
+                        modalBody.textContent = allMessages.productUnavailable;
+                        $(productUnavailableModal).modal('toggle');
+                        return;
+                    }
 
-                if (quantityOnStock === 0) {
-                    elem.innerHTML = '';
-                }
-                if (elem.children.length === 1 || elem.children.length === 0) {
-                    elem.insertAdjacentHTML('beforeEnd', `                            
+                    let boughtNumber = enteredQuantity;
+                    if (check.products.some(p => p.id === product.id)) {
+                        check.products.forEach(pr => {
+                            if (pr.id === product.id) {
+                                pr.boughtQuantity += product.boughtQuantity;
+                                product = pr;
+                            }
+                        });
+                    } else {
+                        check.products.push(product);
+                    }
+
+                    boughtQuantityTd.textContent = product.boughtQuantity + '';
+                    let quantityOnStock = Number.parseInt(boughtQuantityTd.nextElementSibling.textContent);
+                    quantityOnStock -= boughtNumber;
+                    boughtQuantityTd.nextElementSibling.textContent = quantityOnStock + '';
+                    product.quantityOnStock = quantityOnStock;
+
+                    if (quantityOnStock === 0) {
+                        elem.innerHTML = '';
+                    }
+                    if (elem.children.length === 1 || elem.children.length === 0) {
+                        elem.insertAdjacentHTML('beforeEnd', `                            
                         <button class="btn btn-outline-danger ml-md-2" onclick="deleteFromHandler(event)">
                             <i class="fa fa-trash"></i> ${allMessages.delete}
                         </button>               
                     `);
-                }
+                    }
 
-                let checkForm = $('.add-form-content').get(0);
-                check.sum = 0;
-                check.products.forEach(p => {
-                    check.sum += p.price * p.boughtQuantity;
+                    let checkForm = $('.add-form-content').get(0);
+                    check.sum = 0;
+                    check.products.forEach(p => {
+                        check.sum += p.price * p.boughtQuantity;
+                    });
+                    check.sum = Math.round(check.sum * 100) / 100;
+                    checkForm.querySelector('input[id="sum"]').value = check.sum;
+                }).fail(function (jqXHR) {
+                    let html = document.getElementsByTagName('HTML')[0];
+                    html.innerHTML = jqXHR.responseText;
                 });
-                check.sum = Math.round(check.sum * 100) / 100;
-                checkForm.querySelector('input[id="sum"]').value = check.sum;
             });
-
             $(quantityModal).modal('toggle');
         } else if (entity === 'reports') {
             let checkInfo = elem.parentElement;
@@ -594,33 +707,7 @@ const deleteFromHandler = (event) => {
     elem = elem.parentElement;
     let product = {};
     if (currentURL.match(/.*home.*/g)) {
-        product.id = elem.querySelector('input[name="id"]').value;
-        let pIndex = check.products.indexOf(product);
-        check.products.splice(pIndex, 1);
-        if (check.products.length > 0) {
-            check.sum = 0;
-            check.products.forEach(p => {
-                check.sum += p.price * p.boughtQuantity;
-            });
-            check.sum = Math.round(check.sum * 100) / 100;
-            let div = $('.container').get(0).children[0].lastElementChild;
-            if (div.children.length > 0) {
-                div.firstElementChild.querySelector('span').textContent = `Sum: ${check.sum}`;
-            } else {
-                let closeCheck = document.createElement('DIV');
-                closeCheck.classList.add('input-group');
-                closeCheck.insertAdjacentHTML('beforeEnd', `
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">${allMessages.sum}: ${check.sum}</span>
-                    </div>
-                    <button class="btn btn-outline-success" style="border-bottom-left-radius: 0; 
-                        border-top-left-radius: 0" type="button" id="close" name="close" 
-                        onclick="closeCheckHandler()">${allMessages.closeCheck}</button>
-                `);
 
-                div.appendChild(closeCheck);
-            }
-        }
     } else {
         if (entity === 'checks') {
             let quantityModal = $('#quantityModal').get(0);
@@ -724,6 +811,13 @@ const editEntityHandler = (event) => {
         $(itemTable).slideUp('slow');
         formContent.innerHTML = '';
         itemTable.innerHTML = '';
+
+        if (entity === 'checks') {
+            let cf = $('.container-fluid').get(0);
+            cf.classList.remove('container-fluid');
+            cf.classList.add('container');
+        }
+
         return;
     }
 
@@ -746,7 +840,7 @@ const editEntityHandler = (event) => {
             return;
 
         let data = JSON.parse(xhr.response);
-        allMessages = data.messages;
+        allMessages = data.messages === undefined ? data : data.messages;
         if (entity === 'checks' && data.check === undefined)
             check = {products: []};
         else if (entity === 'checks' && data.check !== undefined)
@@ -764,24 +858,28 @@ const editEntityHandler = (event) => {
     };
     xhr.send();
 
-    (function saveHandler() {
-        if ($('#save').length === 0) {
-            setTimeout(saveHandler, 50);
-            return;
-        }
-
-        $('#save').click((event) => {
-
-            if (entity === 'checks')
-                saveCheck(event);
-            else if (entity === 'products')
-                saveProduct(event);
-            else if (entity === 'reports')
-                saveReport(event);
-
-        });
-    })();
+    saveHandler();
 };
+
+function saveHandler() {
+    if ($('#save').length === 0) {
+        setTimeout(saveHandler, 50);
+        return;
+    }
+
+    $('#save').click((event) => {
+
+        if (entity === 'checks')
+            saveCheck(event);
+        else if (entity === 'products')
+            saveProduct(event);
+        else if (entity === 'reports')
+            saveReport(event);
+        else if (entity === 'employees')
+            saveEmployee(event);
+
+    });
+}
 
 const deleteEntityHandler = (event) => {
     let trElem = event.target;
@@ -791,10 +889,13 @@ const deleteEntityHandler = (event) => {
 
     let entityId = trElem.querySelector('input[id="id"]').value;
     $.ajax(`/app/${entity}/${entityId}`, {method: 'DELETE'})
-        .done((textStatus) => {
+        .done((data, textStatus) => {
             if (textStatus === 'success') {
-                processEntityView();
+                window.location.href = `/app/${entity}/view`;
             }
+        }).fail(function (jqXHR) {
+            let html = document.getElementsByTagName('HTML')[0];
+            html.innerHTML = jqXHR.responseText;
         });
 };
 
@@ -802,19 +903,39 @@ const closeCheckHandler = () => {
     check.date = getDate();
     check.status = 'CLOSED';
     let emp = $('.container').get(0).firstElementChild.firstElementChild;
-    // check.employee = {id: emp.querySelector('input[id="employeeId"]').value};
+    check.employee = {
+        id: Number.parseInt(emp.querySelector('input[id="employeeId"]').value),
+        firstName: $('#employeeFirstName').val(),
+        lastName: $('#employeeLastName').val()
+    };
 
     $.ajax(`/app/checks`, {
         method: 'POST',
         data: JSON.stringify(check),
         headers: {'Content-Type': 'application/json'}
-    }).done((data, textStatus) => {
-        if (textStatus === 'success') {
+    }).done((data) => {
+        if (data.errors === undefined) {
             let modal = $('#checkClosed').get(0);
             modal.querySelector('.modal-body').textContent = allMessages.sum + ': ' + check.sum;
             $(modal).modal('toggle');
+        } else {
+            let productUnavailableModal = $('#productUnavailable').get(0);
+            let modalBody = productUnavailableModal.querySelector('.modal-body');
+            modalBody.textContent = data.errors.unavailableProducts;
+            let unavailableProducts = data.unavailableProducts;
+            let listElem = document.createElement('UL');
+            for (let i = 0; i < unavailableProducts.length; i++) {
+                listElem.insertAdjacentHTML('beforeEnd', `
+                        <li>${unavailableProducts[i].title}: ${unavailableProducts[i].code}</li>
+                    `);
+            }
+            modalBody.appendChild(listElem);
+            $(productUnavailableModal).modal('toggle');
         }
-    })
+    }).fail(function (jqXHR) {
+        let html = document.getElementsByTagName('HTML')[0];
+        html.innerHTML = jqXHR.responseText;
+    });
 };
 
 function getDate() {
@@ -885,12 +1006,15 @@ const renderEntity = (json, view) => {
                 if (i === 3) {
                     elem = $('.container').get(2).children[0];
                 }
+                if (json.products[i].quantityOnStock <= 0) {
+                    continue;
+                }
                 productCard(json.products[i], json.messages, elem);
             }
         }
     } else if (entity === 'checks') {
         if (view === 'form') {
-            checkForm(json.check, json.messages, $('.add-form-content').get(0), errors);
+            checkForm(json.check, json.messages, $('.add-form-content').get(0), json.errors);
 
             let div = $('.add-form').get(0).parentElement.nextElementSibling;
             div.style.display = 'none';
@@ -917,12 +1041,13 @@ const renderEntity = (json, view) => {
             setTimeout(() => {
                 $(div).slideDown('slow')
             }, 100);
-
         } else if (view === 'table') {
             let elem = document.getElementsByClassName('well')[0];
             if (elem.firstElementChild.tagName === 'TABLE')
                 elem.removeChild(elem.firstElementChild);
-            checksTable(json.checks, json.messages, elem);
+            let check = json.check != null ? Array.of(json.check) : [];
+            check = json.checks != null ? json.checks : check.length > 0 ? check : [];
+            checksTable(check, json.messages, elem);
         }
     } else if (entity === 'reports') {
         if (view === 'form') {
@@ -956,6 +1081,22 @@ const renderEntity = (json, view) => {
             if (elem.firstElementChild.tagName === 'TABLE')
                 elem.removeChild(elem.firstElementChild);
             reportsTable(json.reports, json.messages, elem);
+        }
+    } else if (entity === 'employees') {
+        if (view === 'table') {
+            let elem = document.getElementsByClassName('well')[0];
+            if (elem.firstElementChild.tagName === 'TABLE')
+                elem.removeChild(elem.firstElementChild);
+            employeesTable(json.employees, json.messages, elem);
+        } else if (view === 'form') {
+            employeeForm(json.employee, json.messages, $('.add-form-content').get(0), json.errors);
+        }
+    } else if (entity === 'users') {
+        if (view === 'table') {
+            let elem = document.getElementsByClassName('well')[0];
+            if (elem.firstElementChild.tagName === 'TABLE')
+                elem.removeChild(elem.firstElementChild);
+            usersTable(json.users, json.messages, elem);
         }
     }
 };
@@ -991,7 +1132,7 @@ const productsTable = (products, messages, htmlElem) => {
                     </button>
                 </td>
                 <td>
-                    <button class="btn btn-outline-danger fade-toggle">
+                    <button class="btn btn-outline-danger delete">
                         <i class="fa fa-trash"></i> ${messages.delete}
                     </button>
                 </td>
@@ -1096,22 +1237,22 @@ const productForm = (product, messages, htmlElem, errors) => {
 
     let form = document.createElement('form');
     form.insertAdjacentHTML('beforeEnd', `
-        <div class="alert alert-danger" style="visibility: ${errors !== undefined ? errors.codeExists !== undefined ? 'visible' : 'hidden' : 'hidden'}">
+        <div class="alert alert-danger" style="display: ${errors !== undefined ? errors.codeExists !== undefined ? 'block' : 'none' : 'none'}">
             <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
             ${errors !== undefined ? errors.codeExists !== undefined ? errors.codeExists : '' : ''}      
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? errors.title !== undefined ? 'visible' : 'hidden' : 'hidden'}">${errors !== undefined ? errors.title : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? errors.title !== undefined ? 'inline' : 'none' : 'none'}">${errors !== undefined ? errors.title : ''}</span>
             <label for="title">${messages.title}</label>
             <input type="text" class="form-control" name="title" id="title" value="${product !== undefined ? product.title : ''}">
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? errors.code !== undefined ? 'visible' : 'hidden' : 'hidden'}">${errors !== undefined ? errors.code : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? errors.code !== undefined ? 'inline' : 'none' : 'none'}">${errors !== undefined ? errors.code : ''}</span>
             <label for="code">${messages.code}</label>
             <input type="number" class="form-control" name="code" id="code" value="${product !== undefined ? product.code : ''}">
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? errors.price !== undefined ? 'visible' : 'hidden' : 'hidden'}">${errors !== undefined ? errors.price : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? errors.price !== undefined ? 'inline' : 'none' : 'none'}">${errors !== undefined ? errors.price : ''}</span>
             <label for="price">${messages.price}</label>
             <input type="text" class="form-control" name="price" id="price" value="${product !== undefined ? product.price : ''}">
         </div>
@@ -1119,20 +1260,21 @@ const productForm = (product, messages, htmlElem, errors) => {
             <label for="quantityType">${messages.quantityType}</label>
             <select id="quantityType" name="quantityType" class="form-control">
                 <option value="PIECE" ${product !== undefined ? product.quantityType === 'PIECE' ? 'selected' : '' : 'seleted'}>piece</option>
-                <option value="KILOGRAM" ${product !== undefined ? product.quantityType === 'KILOGRAM' ? 'selected' : '' : ''}>kilogram</option>
+                <option value="GRAM" ${product !== undefined ? product.quantityType === 'GRAM' ? 'selected' : '' : ''}>gram</option>
             </select>
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? errors.quantityOnStock !== undefined ? 'visible' : 'hidden' : 'hidden'}">${errors !== undefined ? errors.quantityOnStock : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? errors.quantityOnStock !== undefined ? 'inline' : 'none' : 'none'}">${errors !== undefined ? errors.quantityOnStock : ''}</span>
             <label for="quantityOnStock">${messages.quantityOnStock}</label>
             <input type="number" class="form-control" name="quantityOnStock" id="quantityOnStock" 
             value="${product !== undefined ? product.quantityOnStock : ''}">
         </div>
         <div class="form-group">
             <label for="image">${messages.image}</label>
-            <input type="file" accept=".jpg" class="form-control" name="image" id="image" value="${product !== undefined ? product.image : ''}">
+            <input type="file" accept=".jpg" class="form-control" name="image" id="image">
         </div>
-        <input id="id" type="hidden" value="${product !== undefined ? product.id : ''}">
+        <input id="id" type="hidden" value="${product !== undefined ? product.id > 0 ? product.id : '' : ''}">
+        <input id="img" type="hidden" value="${product !== undefined ? product.image : ''}">
         <button id="save" type="button" class="btn btn-outline-success mt-md-3">${messages.save}</button>
     `);
 
@@ -1162,18 +1304,20 @@ const productCard = (product, messages, htmlElem) => {
 
     cardFooter.insertAdjacentHTML('beforeEnd', `
         <form>
-            <div class="form-row">
+            <div class="form-row mb-md-1">
                 <label class="col-sm-4" for="quantity">${messages.quantity}</label>
                 <input type="number" class="form-control col-sm-8" id="quantity" name="quantity" placeholder="0">
             </div>
             <div class="form-row">
                 <label class="col-sm-4" for="price">${messages.price}</label>
-                <input type="number" class="form-control col-sm-8" id="price" name="price" value="${product.price}">
+                <input type="number" class="form-control col-sm-8" id="price" name="price" value="${product.price}" disabled>
             </div>
         </form>
         <input type="hidden" name="id" id="id" value="${product.id}">
+        <input type="hidden" name="title" id="title" value="${product.title}">
+        <input type="hidden" name="code" id="code" value="${product.code}">
         <input type="hidden" name="quantityStock" id="quantityStock" value="${product.quantityOnStock}">
-        <input type="hidden" name="img" id="img" value="${product.image}">
+        <input type="hidden" name="quantityType" id="quantityType" value="${product.quantityType}">
         <button type="button" onclick="addToHandler(event)" class="btn btn-outline-primary mt-sm-3">
             ${messages.add}
         </button>
@@ -1241,20 +1385,41 @@ const checkForm = (check, messages, htmlElem, errors) => {
     cardBody.classList.add('card-body');
 
     let form = document.createElement('form');
+    if (errors !== undefined) {
+        if (errors.employeeNotFound !== undefined || errors.unavailableProducts !== undefined) {
+            form.insertAdjacentHTML('beforeEnd', `
+            <div class="alert alert-danger">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <span style="display: ${errors.employeeNotFound !== undefined ? 'block' : 'none'}">
+                    ${errors.employeeNotFound !== undefined ? errors.employeeNotFound : ''} 
+                </span>
+                <span style="display: ${errors.unavailableProducts !== undefined ? 'block' : 'none'}">
+                    ${errors.unavailableProducts !== undefined ? errors.unavailableProducts : ''} 
+                </span>   
+            </div>
+        `);
+        }
+    }
     form.insertAdjacentHTML('beforeEnd', `
         <div class="form-group">
             <label for="title">${messages.employee}</label>
             <input type="hidden" id="employee-id" name="employee-id" value="${check !== undefined ? check.employee.id : ''}">         
-            <input type="text" class="form-control mb-md-2 disabled" name="employee-fn" id="employee-fn" value="${check !== undefined ? check.employee.firstName : ''}" disabled>
-            <input type="text" class="form-control disabled" name="employee-ln" id="employee-ln" value="${check !== undefined ? check.employee.lastName : ''}" disabled>
+            <lable for="employee-fn">${messages.firstName}</lable>
+            <input type="text" class="form-control mb-md-2 disabled" name="employee-fn" id="employee-fn" value="${check !== undefined ? check.employee.firstName : ''}" 
+                ${check === undefined ? '' : 'disabled'}>
+            <lable for="employee-ln">${messages.lastName}</lable>
+            <input type="text" class="form-control disabled" name="employee-ln" id="employee-ln" value="${check !== undefined ? check.employee.lastName : ''}" 
+                ${check === undefined ? '' : 'disabled'}>
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? 'visible' : 'hidden'}">${errors !== undefined ? errors.sum : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? errors.sum !== undefined ? 'inline' : 'none' : 'none'}">
+                ${errors !== undefined ? errors.sum !== undefined ? errors.sum : '' : ''}</span>
             <label for="sum">${messages.sum}</label>
             <input type="text" class="form-control" name="sum" id="sum" value="${check !== undefined ? check.sum : ''}">
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? 'visible' : 'hidden'}">${errors !== undefined ? errors.date : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? errors.date !== undefined ? 'inline' : 'none' : 'none'}">
+                ${errors !== undefined ? errors.date !== undefined ? errors.date : '' : ''}</span>
             <label for="date">${messages.date}</label>
             <input type="datetime-local" class="form-control" name="date" id="date" value="${check !== undefined ? parseJsonDate(check.date, true) : ''}">
         </div>
@@ -1266,7 +1431,7 @@ const checkForm = (check, messages, htmlElem, errors) => {
                 <option value="REFUNDED" ${check !== undefined ? check.status === 'REFUNDED' ? 'selected' : '' : ''}>refunded</option>
             </select>
         </div>   
-        <input type="hidden" id="id" name="id" value="${check !== undefined ? check.id : ''}">   
+        <input type="hidden" id="id" name="id" value="${check !== undefined ? check.id > 0 ? check.id : '' : ''}">   
         <button id="save" type="button" class="btn btn-outline-success mt-md-3">${messages.save}</button>
     `);
 
@@ -1323,7 +1488,7 @@ const reportsTable = (reports, messages, htmlElem) => {
     htmlElem.insertBefore(table, htmlElem.children[0]);
 };
 
-const reportForm = (reports, messages, htmlElem, errors) => {
+const reportForm = (report, messages, htmlElem, errors) => {
     let card = document.createElement('div');
     card.classList.add('card');
     let cardHeader = document.createElement('div');
@@ -1335,35 +1500,35 @@ const reportForm = (reports, messages, htmlElem, errors) => {
     let form = document.createElement('form');
     form.insertAdjacentHTML('beforeEnd', `
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? 'visible' : 'hidden'}">${errors !== undefined ? errors.since : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? 'inline' : 'none'}">${errors !== undefined ? errors.since : ''}</span>
             <label for="since-date">${messages.sinceDate}</label>
-            <input type="datetime-local" class="form-control" name="since-date" id="since-date" value="${reports !== undefined ? parseJsonDate(reports.since, true) : ''}">
+            <input type="datetime-local" class="form-control" name="since-date" id="since-date" value="${report !== undefined ? parseJsonDate(report.since, true) : ''}">
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? 'visible' : 'hidden'}">${errors !== undefined ? errors.until : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? 'inline' : 'none'}">${errors !== undefined ? errors.until : ''}</span>
             <label for="until-date">${messages.untilDate}</label>
-            <input type="datetime-local" class="form-control" name="until-date" id="until-date" value="${reports !== undefined ? parseJsonDate(reports.until, true) : ''}">
+            <input type="datetime-local" class="form-control" name="until-date" id="until-date" value="${report !== undefined ? parseJsonDate(report.until, true) : ''}">
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? 'visible' : 'hidden'}">${errors !== undefined ? errors.totalSum : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? 'inline' : 'none'}">${errors !== undefined ? errors.totalSum : ''}</span>
             <label for="totalSum">${messages.totalSum}</label>
-            <input type="text" class="form-control" name="totalSum" id="totalSum" value="${reports !== undefined ? reports.totalSum : ''}">
+            <input type="text" class="form-control" name="totalSum" id="totalSum" value="${report !== undefined ? report.totalSum : ''}">
         </div>
         <div class="form-group">
-            <span style="color: red; visibility: ${errors !== undefined ? 'visible' : 'hidden'}">${errors !== undefined ? errors.creationDate : ''}</span>
+            <span style="color: red; display: ${errors !== undefined ? 'inline' : 'none'}">${errors !== undefined ? errors.creationDate : ''}</span>
             <label for="creation-date">${messages.creationDate}</label>
-            <input type="datetime-local" class="form-control" name="creation-date" id="creation-date" value="${reports !== undefined ? parseJsonDate(reports.creationDate, true) : ''}">
+            <input type="datetime-local" class="form-control" name="creation-date" id="creation-date" value="${report !== undefined ? parseJsonDate(report.creationDate, true) : ''}">
         </div>
         <div class="form-group">
             <label for="type">${messages.type}</label>
             <select id="type" name="type" class="form-control">
-                <option value="CLOSED_CHECKS" ${reports !== undefined ? reports.status === 'CLOSED_CHECKS' ? 'selected' : '' : 'selected'}>closed checks</option>
-                <option value="MODIFIED_CHECKS" ${reports !== undefined ? reports.status === 'MODIFIED_CHECKS' ? 'selected' : '' : ''}>modified checks</option>
-                <option value="REFUNDED_CHECKS" ${reports !== undefined ? reports.status === 'REFUNDED_CHECKS' ? 'selected' : '' : ''}>refunded checks</option>
-                <option value="MIXED_CHECKS" ${reports !== undefined ? reports.status === 'MIXED_CHECKS' ? 'selected' : '' : ''}>mixed checks</option>
+                <option value="CLOSED_CHECKS" ${report !== undefined ? report.status === 'CLOSED_CHECKS' ? 'selected' : '' : 'selected'}>closed checks</option>
+                <option value="MODIFIED_CHECKS" ${report !== undefined ? report.status === 'MODIFIED_CHECKS' ? 'selected' : '' : ''}>modified checks</option>
+                <option value="REFUNDED_CHECKS" ${report !== undefined ? report.status === 'REFUNDED_CHECKS' ? 'selected' : '' : ''}>refunded checks</option>
+                <option value="MIXED_CHECKS" ${report !== undefined ? report.status === 'MIXED_CHECKS' ? 'selected' : '' : ''}>mixed checks</option>
             </select>
         </div>   
-        <input type="hidden" id="id" name="id" value="${reports !== undefined ? reports.id : ''}">   
+        <input type="hidden" id="id" name="id" value="${report !== undefined ? report.id > 0 ? report.id : '' : ''}">   
         <button id="save" type="button" class="btn btn-outline-success mt-md-3">${messages.save}</button>
     `);
 
@@ -1418,6 +1583,145 @@ const reportChecksTable = (checks, messages, htmlElem) => {
         }
         tr.appendChild(tdButtons);
         tbody.appendChild(tr);
+    }
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    htmlElem.insertBefore(table, htmlElem.children[0]);
+};
+
+const employeesTable = (employees, messages, htmlElem) => {
+    let table = document.createElement('table');
+    table.classList.add('table', 'table-striped');
+    let thead = document.createElement('thead');
+    thead.insertAdjacentHTML('beforeEnd', `
+        <tr>
+            <th>${messages.firstName}</th>
+            <th>${messages.lastName}</th>
+            <th>${messages.email}</th>
+            <th>${messages.salary}</th>
+            <th>${messages.position}</th>
+            <th>${messages.edit}</th>
+            <th>${messages.delete}</th>
+        </tr>
+    `);
+
+    let tbody = document.createElement('tbody');
+    for (let i = 0; i < employees.length; i++) {
+        tbody.insertAdjacentHTML('beforeEnd', `
+            <tr>
+                <td>${employees[i].firstName}</td>
+                <td>${employees[i].lastName}</td>
+                <td>${employees[i].email}</td>
+                <td>${employees[i].salary}</td>
+                <td>${employees[i].position}</td>
+                <td>
+                    <button class="btn btn-outline-info add-form">
+                        <i class="fa fa-edit"></i> ${messages.edit}
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-outline-danger delete">
+                        <i class="fa fa-trash"></i> ${messages.delete}
+                    </button>
+                </td>
+                <input type="hidden" id="id" name="id" value="${employees[i].id}">
+            </tr>
+        `);
+    }
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    htmlElem.insertBefore(table, htmlElem.children[0]);
+};
+
+const employeeForm = (employee, messages, htmlElem, errors) => {
+    let card = document.createElement('div');
+    card.classList.add('card');
+    let cardHeader = document.createElement('div');
+    cardHeader.classList.add('card-header');
+    cardHeader.textContent = 'Item';
+    let cardBody = document.createElement('div');
+    cardBody.classList.add('card-body');
+
+    let form = document.createElement('form');
+    form.insertAdjacentHTML('beforeEnd', `
+        <div class="form-group">
+            <span style="color: red; display: ${errors !== undefined ? 'inline' : 'none'}">${errors !== undefined ? errors.firstName : ''}</span>
+            <label for="firstName">${messages.firstName}</label>
+            <input type="text" class="form-control" name="firstName" id="firstName" value="${employee !== undefined ? employee.firstName : ''}" disabled>
+        </div>
+        <div class="form-group">
+            <span style="color: red; display: ${errors !== undefined ? 'inline' : 'none'}">${errors !== undefined ? errors.lastName : ''}</span>
+            <label for="lastName">${messages.lastName}</label>
+            <input type="text" class="form-control" name="lastName" id="lastName" value="${employee !== undefined ? employee.lastName : ''}" disabled>
+        </div>
+        <div class="form-group">
+            <span style="color: red; display: ${errors !== undefined ? 'inline' : 'none'}">${errors !== undefined ? errors.email : ''}</span>
+            <label for="email">${messages.email}</label>
+            <input type="email" class="form-control" name="email" id="email" value="${employee !== undefined ? employee.email : ''}" disabled>
+        </div>
+        <div class="form-group">
+            <span style="color: red; display: ${errors !== undefined ? 'inline' : 'none'}">${errors !== undefined ? errors.salary : ''}</span>
+            <label for="salary">${messages.salary}</label>
+            <input type="text" class="form-control" name="salary" id="salary" value="${employee !== undefined ? employee.salary : ''}">
+        </div>
+        <div class="form-group">
+            <label for="position">${messages.type}</label>
+            <select id="type" name="type" class="form-control">
+                <option value="CASHIER" ${employee !== undefined ? employee.position === 'CASHIER' ? 'selected' : '' : 'selected'}>cashier</option>
+                <option value="SENIOR_CASHIER" ${employee !== undefined ? employee.position === 'SENIOR_CASHIER' ? 'selected' : '' : ''}>senior cashier</option>
+                <option value="COMMODITIES_EXPERT" ${employee !== undefined ? employee.position === 'COMMODITIES_EXPERT' ? 'selected' : '' : ''}>commodities expert</option>
+                <option value="ADMINISTRATOR" ${employee !== undefined ? employee.status === 'ADMINISTRATOR' ? 'selected' : '' : ''}>administrator</option>
+            </select>
+        </div>   
+        <input type="hidden" id="id" name="id" value="${employee !== undefined ? employee.id > 0 ? employee.id : '' : ''}">   
+        <button id="save" type="button" class="btn btn-outline-success mt-md-3">${messages.save}</button>
+    `);
+
+    cardBody.appendChild(form);
+    card.appendChild(cardHeader);
+    card.appendChild(cardBody);
+
+    htmlElem.appendChild(card);
+};
+
+const usersTable = (users, messages, htmlElem) => {
+    let table = document.createElement('table');
+    table.classList.add('table', 'table-striped');
+    let thead = document.createElement('thead');
+    thead.insertAdjacentHTML('beforeEnd', `
+        <tr>
+            <th>${messages.login}</th>
+            <th>${messages.role}</th>
+            <th>${messages.employee}</th>           
+            <th>${messages.edit}</th>
+            <th>${messages.delete}</th>
+        </tr>
+    `);
+
+    let tbody = document.createElement('tbody');
+    for (let i = 0; i < users.length; i++) {
+        tbody.insertAdjacentHTML('beforeEnd', `
+            <tr>
+                <td>${users[i].login}</td>
+                <td>${users[i].role}</td>
+                <td>${users[i].employee.firstName} ${users[i].employee.lastName}</td>               
+                <td>
+                    <button class="btn btn-outline-info add-form">
+                        <i class="fa fa-edit"></i> ${messages.edit}
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-outline-danger delete">
+                        <i class="fa fa-trash"></i> ${messages.delete}
+                    </button>
+                </td>
+                <input type="hidden" id="id" name="id" value="${users[i].id}">
+            </tr>
+        `);
     }
 
     table.appendChild(thead);

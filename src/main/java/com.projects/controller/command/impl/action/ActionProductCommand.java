@@ -1,6 +1,7 @@
 package com.projects.controller.command.impl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.projects.controller.util.PagesView;
 import com.projects.controller.util.i18n.Internationalization;
 import com.projects.controller.util.json.JsonUtil;
 import com.projects.model.dao.exception.DaoException;
@@ -28,7 +29,7 @@ public class ActionProductCommand extends AbstractActionCommand<Product> {
 
     @Override
     String getView() {
-        return "edit-view";
+        return PagesView.EDIT_VIEW;
     }
 
     @Override
@@ -60,6 +61,7 @@ public class ActionProductCommand extends AbstractActionCommand<Product> {
         messages.put("productSearch", Internationalization.getText("label.product.search"));
         messages.put("closeCheck", Internationalization.getText("label.close.check"));
         messages.put("sum", Internationalization.getText("label.sum"));
+        messages.put("productUnavailable", Internationalization.getText("error.product.unavailable"));
 
         return messages;
     }
@@ -180,10 +182,14 @@ public class ActionProductCommand extends AbstractActionCommand<Product> {
     }
 
     private boolean checkProductCodeExists(Product product, HttpServletResponse response) throws DaoException, IOException {
-        if (productService.findByCode(product.getCode()) != null) {
+        Product p = productService.findByCode(product.getCode());
+        if (p != null) {
+            if (p.getId().equals(product.getId()))
+                return false;
+
             String commonJson = constructFullJson(product);
             Map<String, String> errors = new HashMap<>();
-            errors.put("codeExists", Internationalization.getText("code.exists"));
+            errors.put("codeExists", Internationalization.getText("error.code.exists"));
             String errorsJson = JsonUtil.createJson(errors);
             commonJson = JsonUtil.addToJson(commonJson, errorsJson, "errors");
 

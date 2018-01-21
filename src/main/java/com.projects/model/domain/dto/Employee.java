@@ -2,12 +2,25 @@ package com.projects.model.domain.dto;
 
 import com.projects.model.domain.Entity;
 import com.projects.model.domain.constant.Position;
+import com.projects.model.validation.annotation.DecimalMin;
+import com.projects.model.validation.annotation.Min;
+import com.projects.model.validation.annotation.NotNull;
+import com.projects.model.validation.annotation.Pattern;
 
 public class Employee extends Entity {
+    @Pattern(regex = {"^\\w{2,}$", "^\\S+$"}, message = "error.empty")
     private final String firstName;
+
+    @Pattern(regex = {"^\\w{2,}$", "^\\S+$"}, message = "error.empty")
     private final String lastName;
+
+    @Pattern(regex = {"^[A-Za-z0-9.]+@[a-z]+\\.[a-z]{2,6}$"}, message = "error.email")
     private final String email;
+
+    @DecimalMin(message = "error.lt.zero")
     private final Double salary;
+
+    @NotNull(message = "error.not.null")
     private final Position position;
 
     public Employee(Builder builder) {

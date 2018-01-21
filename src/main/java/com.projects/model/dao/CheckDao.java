@@ -10,6 +10,8 @@ public interface CheckDao extends AbstractDao<Check, Long> {
     List<Check> getAllByDate(String date) throws DaoException;
 
     List<Check> getAllByReportId(long reportId) throws DaoException;
+    
+    List<Check> getAllByEmployeeId(long employeeId) throws DaoException;
 
     boolean detachProduct(long checkId, long productId) throws DaoException;
 

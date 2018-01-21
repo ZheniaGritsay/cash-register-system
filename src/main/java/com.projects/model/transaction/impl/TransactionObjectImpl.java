@@ -42,8 +42,8 @@ public class TransactionObjectImpl implements TransactionObject {
             connectionHolder.getCurrentConnection().setAutoCommit(false);
             connectionHolder.getCurrentConnection().setTransactionIsolation(transactionIsolation);
         } catch (SQLException e) {
-            logger.error("", e);
-            throw new TransactionException("");
+            logger.error("failed to start transaction: " + e.getMessage());
+            throw new TransactionException(e);
         }
 
         connectionHolder.setTransactionActive(true);
@@ -59,14 +59,14 @@ public class TransactionObjectImpl implements TransactionObject {
 
         try {
             connectionHolder.getCurrentConnection().commit();
+            status = Status.COMMITTED;
+            connectionHolder.setTransactionActive(false);
+            connectionHolder.getCurrentConnection().setAutoCommit(true);
+            connectionHolder.closeCurrentConnection();
         } catch (SQLException e) {
-            logger.error("", e);
-            throw new TransactionException("");
+            logger.error("failed to commit transaction: " + e.getMessage());
+            throw new TransactionException("unable to commit", e);
         }
-
-        status = Status.COMMITTED;
-        connectionHolder.setTransactionActive(false);
-        connectionHolder.closeCurrentConnection();
     }
 
     @Override
@@ -79,14 +79,14 @@ public class TransactionObjectImpl implements TransactionObject {
 
         try {
             connectionHolder.getCurrentConnection().rollback();
+            status = Status.ROLLED_BACK;
+            connectionHolder.setTransactionActive(false);
+            connectionHolder.getCurrentConnection().setAutoCommit(true);
+            connectionHolder.closeCurrentConnection();
         } catch (SQLException e) {
-            logger.error("", e);
-            throw new TransactionException("unable rollback: " + e.getMessage());
+            logger.error("failed to rollback transaction: " + e.getMessage());
+            throw new TransactionException("unable to rollback", e);
         }
-
-        status = Status.ROLLED_BACK;
-        connectionHolder.setTransactionActive(false);
-        connectionHolder.closeCurrentConnection();
     }
 
     @Override

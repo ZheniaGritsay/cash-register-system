@@ -43,12 +43,8 @@ public class DispatcherController extends HttpServlet {
         String prefix = "/WEB-INF/jsp/";
         String suffix = ".jsp";
         try {
-            System.out.println(request.getPathInfo());
-            System.out.println(request.getRequestURI());
-            System.out.println(request.getServletPath());
             String commandName = request.getPathInfo();
-            if (commandName == null)
-                commandName = request.getRequestURI();
+            commandName = commandName == null ? "/" : commandName;
             if (commandName.equals("/")) {
                 request.getRequestDispatcher("/WEB-INF/index.jsp").forward(request, response);
                 return;
@@ -64,13 +60,11 @@ public class DispatcherController extends HttpServlet {
                 RequestDispatcher dispatcher = request.getRequestDispatcher(view);
                 dispatcher.forward(request, response);
             } else {
-                request.getRequestDispatcher(prefix + "404" + suffix);
-//                response.sendError(404);
+                response.sendError(404);
             }
         } catch (InternalServerException e) {
             logger.error("internal server error arose", e);
-            request.getRequestDispatcher(prefix + "500" + suffix);
-//            response.sendError(500);
+            response.sendError(500);
         }
     }
 }

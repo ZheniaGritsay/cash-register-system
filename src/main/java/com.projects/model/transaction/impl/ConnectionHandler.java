@@ -15,7 +15,7 @@ public class ConnectionHandler implements InvocationHandler {
         Object retVal = null;
 
         if ("close".equals(method.getName())) {
-            if (!TransactionManagerService.getConnectionHolder().isTransactionActive()) {
+            if (!TransactionManagerService.isTransactionExists()) {
                 retVal = method.invoke(target, args);
             }
         } else {

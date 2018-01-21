@@ -33,7 +33,7 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
             pStatement.setTimestamp(3, Timestamp.valueOf(check.getDate()));
             pStatement.setInt(4, check.getStatus().ordinal());
         } catch (SQLException e) {
-            logger.error("failed prepared statement for create", e);
+            logger.error("failed setting prepared statement for create: " + e.getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
             preparedStatementForCreate(pStatement, check);
             pStatement.setLong(5, check.getId());
         } catch (SQLException e) {
-            logger.error("failed prepared statement for update", e);
+            logger.error("failed setting prepared statement for update: " + e.getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
                 checkList.add(check);
             }
         } catch (SQLException e) {
-            logger.error("failed parse result set", e);
+            logger.error("failed parse result set: " + e.getMessage());
         }
         return checkList;
     }
@@ -100,6 +100,17 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
     }
 
     @Override
+    public List<Check> getAllByEmployeeId(long employeeId) throws DaoException {
+        List<Check> list = preparedStatementExec(c -> {
+            PreparedStatement ps = c.prepareStatement(getSQLQueries().getQuery(SQLQueries.GET_ALL_BY_EMPLOYEE_ID));
+            ps.setLong(1, employeeId);
+            return ps;
+        });
+
+        return list;
+    }
+
+    @Override
     public boolean detachProduct(long checkId, long productId) throws DaoException {
         boolean detached;
 
@@ -112,8 +123,8 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
             detached = pStatement.execute();
 
         } catch (SQLException e) {
-            logger.error("failed to detach a product from the check", e);
-            throw new DaoException("unable to detach product: " + e.getMessage());
+            logger.error("failed to detach a product from the check: " + e.getMessage());
+            throw new DaoException("unable to detach product", e);
         }
 
         return detached;
@@ -133,8 +144,8 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
             attached = pStatement.execute();
 
         } catch (SQLException e) {
-            logger.error("failed to attach a product from the check", e);
-            throw new DaoException("unable to attach product: " + e.getMessage());
+            logger.error("failed to attach a product from the check: " + e.getMessage());
+            throw new DaoException("unable to attach product", e);
         }
 
         return attached;
@@ -154,8 +165,8 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
             updated = pStatement.execute();
 
         } catch (SQLException e) {
-            logger.error("failed to update a product in the check", e);
-            throw new DaoException("unable to update product in the check: " + e.getMessage());
+            logger.error("failed to update a product in the check: " + e.getMessage());
+            throw new DaoException("unable to update product in the check", e);
         }
 
         return updated;

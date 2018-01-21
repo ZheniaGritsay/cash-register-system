@@ -2,15 +2,26 @@ package com.projects.model.domain.dto;
 
 import com.projects.model.domain.Entity;
 import com.projects.model.domain.constant.CheckStatus;
+import com.projects.model.validation.annotation.DecimalMin;
+import com.projects.model.validation.annotation.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class Check extends Entity {
+    @NotNull(message = "error.not.null")
     private final Employee employee;
+
+    @NotNull(message = "error.not.null")
     private final List<Product> products;
+
+    @DecimalMin(message = "error.lt.zero")
     private final Double sum;
+
+    @NotNull(message = "error.not.null")
     private final LocalDateTime date;
+
+    @NotNull(message = "error.not.null")
     private final CheckStatus status;
 
     public Check(Builder builder) {

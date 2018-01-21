@@ -1,10 +1,7 @@
 package com.projects.controller.command.manager.impl;
 
 import com.projects.controller.command.Command;
-import com.projects.controller.command.impl.CommonCommand;
-import com.projects.controller.command.impl.LoginCommand;
-import com.projects.controller.command.impl.LogoutCommand;
-import com.projects.controller.command.impl.RegistrationCommand;
+import com.projects.controller.command.impl.*;
 import com.projects.controller.command.impl.action.*;
 import com.projects.controller.command.manager.CommandManager;
 
@@ -50,5 +47,6 @@ public class CommandManagerImpl implements CommandManager {
         commands.put(properties.getProperty("reports"), new ActionReportCommand());
         commands.put(properties.getProperty("employees"), new ActionEmployeeCommand());
         commands.put(properties.getProperty("users"), new ActionUserCommand());
+        commands.put(properties.getProperty("edit.account"), new EditAccountCommand());
     }
 }

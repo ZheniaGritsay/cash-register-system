@@ -89,7 +89,7 @@ public class JdbcReportDaoImpl extends JdbcAbstractDaoImpl<Report, Long> impleme
             pStatement.setLong(1, reportId);
             pStatement.setLong(2, checkId);
 
-            appended = pStatement.execute();
+            appended = pStatement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             logger.error("failed to append a check to the report: " + e.getMessage());
@@ -109,7 +109,7 @@ public class JdbcReportDaoImpl extends JdbcAbstractDaoImpl<Report, Long> impleme
             pStatement.setLong(1, reportId);
             pStatement.setLong(2, checkId);
 
-            removed = pStatement.execute();
+            removed = pStatement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             logger.error("failed to remove a check from the report: " + e.getMessage());

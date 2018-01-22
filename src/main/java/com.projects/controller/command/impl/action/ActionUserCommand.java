@@ -2,9 +2,6 @@ package com.projects.controller.command.impl.action;
 
 import com.projects.controller.util.PagesView;
 import com.projects.controller.util.i18n.Internationalization;
-import com.projects.controller.util.json.JsonUtil;
-import com.projects.model.dao.exception.DaoException;
-import com.projects.model.domain.constant.Role;
 import com.projects.model.domain.dto.User;
 import com.projects.model.service.AbstractService;
 import com.projects.model.service.UserService;

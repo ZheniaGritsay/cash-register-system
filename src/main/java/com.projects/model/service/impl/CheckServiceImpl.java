@@ -1,21 +1,14 @@
 package com.projects.model.service.impl;
 
 import com.projects.model.dao.CheckDao;
-import com.projects.model.dao.ProductDao;
 import com.projects.model.dao.exception.DaoException;
-import com.projects.model.dao.factory.impl.DaoFactoryImpl;
 import com.projects.model.domain.dto.Check;
 import com.projects.model.domain.dto.Product;
 import com.projects.model.service.CheckService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CheckServiceImpl extends AbstractServiceImpl<CheckDao, Check, Long> implements CheckService {
     private static Logger logger = LoggerFactory.getLogger(CheckServiceImpl.class);

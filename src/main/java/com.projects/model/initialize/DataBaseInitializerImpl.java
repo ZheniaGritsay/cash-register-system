@@ -4,18 +4,12 @@ import com.projects.model.dao.exception.InitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 
 public class DataBaseInitializerImpl implements DataBaseInitializer {
@@ -52,19 +46,19 @@ public class DataBaseInitializerImpl implements DataBaseInitializer {
             }
 
         } catch (SQLException e) {
-            logger.error("failed to initialize database", e);
+            logger.error("failed to initialize database: " + e.getMessage());
             throw new InitializationException("unable to initialize database: " + e.getMessage());
         } catch (IOException e) {
-            logger.error("failed to load sql script file", e);
+            logger.error("failed to load sql script file: " + e.getMessage());
             throw new InitializationException("unable to load sql script: " + e.getMessage());
         } catch (ClassNotFoundException e) {
-            logger.error("failed to load driver", e);
+            logger.error("failed to load driver: " + e.getMessage());
         } finally {
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    logger.error("failed to close connection", e);
+                    logger.error("failed to close connection: " + e.getMessage());
                 }
             }
         }

@@ -4,7 +4,6 @@ import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.dto.Check;
 import com.projects.model.domain.dto.Product;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CheckService extends AbstractService<Check, Long> {

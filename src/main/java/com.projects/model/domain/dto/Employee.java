@@ -3,7 +3,6 @@ package com.projects.model.domain.dto;
 import com.projects.model.domain.Entity;
 import com.projects.model.domain.constant.Position;
 import com.projects.model.validation.annotation.DecimalMin;
-import com.projects.model.validation.annotation.Min;
 import com.projects.model.validation.annotation.NotNull;
 import com.projects.model.validation.annotation.Pattern;
 

@@ -118,7 +118,7 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
             pStatement.setLong(1, checkId);
             pStatement.setLong(2, productId);
 
-            detached = pStatement.execute();
+            detached = pStatement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             logger.error("failed to detach a product from the check: " + e.getMessage());
@@ -139,7 +139,7 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
             pStatement.setLong(2, productId);
             pStatement.setLong(3, boughtQuantity);
 
-            attached = pStatement.execute();
+            attached = pStatement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             logger.error("failed to attach a product from the check: " + e.getMessage());
@@ -160,7 +160,7 @@ public class JdbcCheckDaoImpl extends JdbcAbstractDaoImpl<Check, Long> implement
             pStatement.setLong(2, checkId);
             pStatement.setLong(3, productId);
 
-            updated = pStatement.execute();
+            updated = pStatement.executeUpdate() > 0;
 
         } catch (SQLException e) {
             logger.error("failed to update a product in the check: " + e.getMessage());

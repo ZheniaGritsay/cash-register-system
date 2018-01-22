@@ -3,7 +3,6 @@ package com.projects.model.dao;
 import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.dto.Check;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface CheckDao extends AbstractDao<Check, Long> {

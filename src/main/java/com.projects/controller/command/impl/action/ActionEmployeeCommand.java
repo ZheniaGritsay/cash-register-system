@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.projects.controller.util.PagesView;
 import com.projects.controller.util.i18n.Internationalization;
 import com.projects.controller.util.json.JsonUtil;
-import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.constant.Position;
 import com.projects.model.domain.dto.Employee;
 import com.projects.model.service.AbstractService;

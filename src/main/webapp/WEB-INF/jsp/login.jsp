@@ -32,20 +32,32 @@
 </div>
 <div class="row">
     <div class="col-sm-4">
-        <form class="form-inline" style="margin-left: 65%">
-            <select class="form-control" id="language" name="language" onchange="submit()">
-                <option value="en_US" ${language == 'en_US' ? 'selected' : ''}>
-                    <fmt:message key="label.english" bundle="${bundle}"/>
-                </option>
-                <option value="ru_RU" ${language == 'ru_RU' ? 'selected' : ''}>
-                    <fmt:message key="label.russian" bundle="${bundle}"/>
-                </option>
-            </select>
-        </form>
+        <%--<form class="form-inline" style="margin-left: 65%">--%>
+            <%--<select class="form-control" id="language" name="language" onchange="submit()">--%>
+                <%--<option value="en_US" ${language == 'en_US' ? 'selected' : ''}>--%>
+                    <%--<fmt:message key="label.english" bundle="${bundle}"/>--%>
+                <%--</option>--%>
+                <%--<option value="ru_RU" ${language == 'ru_RU' ? 'selected' : ''}>--%>
+                    <%--<fmt:message key="label.russian" bundle="${bundle}"/>--%>
+                <%--</option>--%>
+            <%--</select>--%>
+        <%--</form>--%>
     </div>
     <div class="col-sm-4">
         <div class="card">
-            <div class="card-header"><b><fmt:message key="title.login" bundle="${bundle}"/></b></div>
+            <div class="card-header" style="position: relative">
+                <b><fmt:message key="title.login" bundle="${bundle}"/></b>
+                <form class="form-inline" style="left: 70%; position: relative; display: inline">
+                    <select class="form-control" id="language" name="language" onchange="submit()">
+                        <option value="en_US" ${language == 'en_US' ? 'selected' : ''}>
+                            <fmt:message key="label.english" bundle="${bundle}"/>
+                        </option>
+                        <option value="ru_RU" ${language == 'ru_RU' ? 'selected' : ''}>
+                            <fmt:message key="label.russian" bundle="${bundle}"/>
+                        </option>
+                    </select>
+                </form>
+            </div>
             <div class="card-body">
                 <c:if test="${not empty error}">
                     <div class="alert alert-danger">

@@ -65,6 +65,8 @@ const saveEmployee = (event) => {
         if (data.errors === undefined) {
             window.location.href = '/app/employees/view';
         } else {
+            let formContent = $('.add-form-content').get(0);
+            formContent.innerHTML = '';
             renderEntity(data, 'form');
             saveHandler();
         }
@@ -79,6 +81,7 @@ const saveCheck = (event) => {
     let employeeId = $('#employee-id').val();
     checkId.id = checkId === '' ? 0 : Number.parseInt(checkId);
     check.date = formatForJava(new Date($('#date').val()));
+    check.sum = Number.parseFloat($('#sum').val());
     check.employee = {
         id: employeeId === '' ? 0 : Number.parseInt(employeeId),
         firstName: $('#employee-fn').val(),
@@ -95,6 +98,15 @@ const saveCheck = (event) => {
         if (data.errors === undefined) {
             window.location.href = '/app/checks/view';
         } else {
+
+            let formContent = $('.add-form-content').get(0);
+            formContent.innerHTML = '';
+            let div = $('.add-form').get(0).parentElement.nextElementSibling;
+            div.innerHTML = '';
+            let conFluid = $('.container-fluid').get(0);
+            conFluid.classList.remove('container-fluid');
+            conFluid.classList.add('container');
+
             renderEntity(data, 'form');
             saveHandler();
             if (data.errors.unavailableProducts !== undefined) {
@@ -190,6 +202,11 @@ const saveReport = (event) => {
         if (data.errors === undefined) {
             window.location.href = '/app/reports/view';
         } else {
+            let formContent = $('.add-form-content').get(0);
+            formContent.innerHTML = '';
+            let div = $('.add-form').get(0).parentElement.nextElementSibling;
+            div.innerHTML = '';
+
             renderEntity(data, 'form');
             saveHandler();
         }
@@ -529,6 +546,7 @@ const addToHandler = (event) => {
 
         $.ajax(`/app/products/${product.id}`, {method: 'GET'}).done((data) => {
             if (data.product.quantityOnStock < quantity) {
+                allMessages = data.messages;
                 let productUnavailableModal = $('#productUnavailable').get(0);
                 let modalBody = productUnavailableModal.querySelector('.modal-body');
                 modalBody.textContent = allMessages.productUnavailable;
@@ -607,6 +625,7 @@ const addToHandler = (event) => {
                 product = {
                     id: Number.parseInt(productId),
                     title: prodInfo.querySelector('input[id="productTitle"]').value,
+                    code: Number.parseInt(prodInfo.querySelector('input[id="productCode"]').value),
                     price: Number.parseFloat(productPrice),
                     boughtQuantity: enteredQuantity,
                     quantityType: prodInfo.querySelector('input[id="productQuantityType"]').value,
@@ -616,6 +635,7 @@ const addToHandler = (event) => {
 
                 $.ajax(`/app/products/${product.id}`, {method: 'GET'}).done((data) => {
                     if (data.product.quantityOnStock < enteredQuantity) {
+                        allMessages = data.messages;
                         let productUnavailableModal = $('#productUnavailable').get(0);
                         let modalBody = productUnavailableModal.querySelector('.modal-body');
                         modalBody.textContent = allMessages.productUnavailable;
@@ -894,9 +914,9 @@ const deleteEntityHandler = (event) => {
                 window.location.href = `/app/${entity}/view`;
             }
         }).fail(function (jqXHR) {
-            let html = document.getElementsByTagName('HTML')[0];
-            html.innerHTML = jqXHR.responseText;
-        });
+        let html = document.getElementsByTagName('HTML')[0];
+        html.innerHTML = jqXHR.responseText;
+    });
 };
 
 const closeCheckHandler = () => {
@@ -944,6 +964,9 @@ function getDate() {
 }
 
 function parseJsonDate(date, forInput) {
+    if (date == null || date === undefined)
+        return '';
+
     let year = date.year;
     let month = date.monthValue;
     let day = date.dayOfMonth;
@@ -1042,7 +1065,8 @@ const renderEntity = (json, view) => {
                 $(div).slideDown('slow')
             }, 100);
         } else if (view === 'table') {
-            let elem = document.getElementsByClassName('well')[0];
+            let elem = document.getElementsByClassName('main')[0];
+            elem = elem.querySelector('.well');
             if (elem.firstElementChild.tagName === 'TABLE')
                 elem.removeChild(elem.firstElementChild);
             let check = json.check != null ? Array.of(json.check) : [];
@@ -1164,7 +1188,9 @@ const checkProductsTable = (products, messages, htmlElem) => {
 
     let tbody = document.createElement('tbody');
     for (let i = 0; i < products.length; i++) {
-        if (products[i].quantityOnStock <= 0)
+        let inCheck = check.products.some(p => p.id === products[i].id);
+        let enoughQuantity = products[i].quantityOnStock > 0;
+        if (!enoughQuantity && !inCheck)
             continue;
 
         let tr = document.createElement('TR');
@@ -1199,16 +1225,19 @@ const checkProductsTable = (products, messages, htmlElem) => {
             <td>${prodIndex !== -1 ? check.products[prodIndex].quantityOnStock : products[i].quantityOnStock}</td>                
             <input type="hidden" id="productId" name="productId" value="${products[i].id}">
             <input type="hidden" id="productTitle" name="productTitle" value="${products[i].title}">
+            <input type="hidden" id="productCode" name="productCode" value="${products[i].code}">
             <input type="hidden" id="productPrice" name="productPrice" value="${products[i].price}">
             <input type="hidden" id="productQuantityType" name="productQuantityType" value="${products[i].quantityType}">
             <input type="hidden" id="productImage" name="productImage" value="${products[i].image}">
         `);
         let tdButtons = document.createElement('TD');
-        tdButtons.insertAdjacentHTML('beforeEnd', `                              
+        if (enoughQuantity) {
+            tdButtons.insertAdjacentHTML('beforeEnd', `                              
                     <button class="btn btn-outline-success mb-md-1" onclick="addToHandler(event)">
                         <i class="fa fa-plus-circle"></i> ${messages.add}
                     </button>               
             `);
+        }
         if (prodIndex !== -1 && check.products[prodIndex].boughtQuantity > 0) {
             tdButtons.insertAdjacentHTML('beforeEnd', `                               
                     <button class="btn btn-outline-danger ml-md-2" onclick="deleteFromHandler(event)">
@@ -1385,20 +1414,16 @@ const checkForm = (check, messages, htmlElem, errors) => {
     cardBody.classList.add('card-body');
 
     let form = document.createElement('form');
-    if (errors !== undefined) {
-        if (errors.employeeNotFound !== undefined || errors.unavailableProducts !== undefined) {
-            form.insertAdjacentHTML('beforeEnd', `
+    if (errors !== undefined && errors.employeeNotFound !== undefined) {
+        form.insertAdjacentHTML('beforeEnd', `
             <div class="alert alert-danger">
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                 <span style="display: ${errors.employeeNotFound !== undefined ? 'block' : 'none'}">
                     ${errors.employeeNotFound !== undefined ? errors.employeeNotFound : ''} 
-                </span>
-                <span style="display: ${errors.unavailableProducts !== undefined ? 'block' : 'none'}">
-                    ${errors.unavailableProducts !== undefined ? errors.unavailableProducts : ''} 
-                </span>   
+                </span>                   
             </div>
         `);
-        }
+
     }
     form.insertAdjacentHTML('beforeEnd', `
         <div class="form-group">
@@ -1406,10 +1431,10 @@ const checkForm = (check, messages, htmlElem, errors) => {
             <input type="hidden" id="employee-id" name="employee-id" value="${check !== undefined ? check.employee.id : ''}">         
             <lable for="employee-fn">${messages.firstName}</lable>
             <input type="text" class="form-control mb-md-2 disabled" name="employee-fn" id="employee-fn" value="${check !== undefined ? check.employee.firstName : ''}" 
-                ${check === undefined ? '' : 'disabled'}>
+                ${check !== undefined ? check.id > 0 ? 'disabled' : '' : ''}>
             <lable for="employee-ln">${messages.lastName}</lable>
             <input type="text" class="form-control disabled" name="employee-ln" id="employee-ln" value="${check !== undefined ? check.employee.lastName : ''}" 
-                ${check === undefined ? '' : 'disabled'}>
+                ${check !== undefined ? check.id > 0 ? 'disabled' : '' : ''}>
         </div>
         <div class="form-group">
             <span style="color: red; display: ${errors !== undefined ? errors.sum !== undefined ? 'inline' : 'none' : 'none'}">

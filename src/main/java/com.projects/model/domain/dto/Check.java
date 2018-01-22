@@ -15,7 +15,7 @@ public class Check extends Entity {
     @NotNull(message = "error.not.null")
     private final List<Product> products;
 
-    @DecimalMin(message = "error.lt.zero")
+    @DecimalMin(value = 1.00, message = "error.lt.zero")
     private final Double sum;
 
     @NotNull(message = "error.not.null")

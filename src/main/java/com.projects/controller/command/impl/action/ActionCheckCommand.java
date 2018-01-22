@@ -2,6 +2,7 @@ package com.projects.controller.command.impl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.projects.controller.util.DateUtil;
 import com.projects.controller.util.PagesView;
 import com.projects.controller.util.i18n.Internationalization;
 import com.projects.controller.util.json.JsonUtil;
@@ -26,13 +27,11 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -125,21 +124,18 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
                 .lastName(employeeNode.path("lastName").textValue())
                 .build();
 
-        LocalDateTime parsedDate;
-        try {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm");
-            parsedDate = LocalDateTime.parse(checkTree.path("date").asText(), dtf);
-        } catch (DateTimeParseException e) {
-            logger.error("failed to parse check date: " + e.getParsedString());
-            parsedDate = null;
-        }
+        LocalDateTime parsedDate = null;
+        String unParsedDate = checkTree.path("date").asText();
+        if (DateUtil.dateConforms(unParsedDate, DateUtil.MM_DD_YYYY_HH_MM_REGEX))
+            parsedDate = DateUtil.parseDate(unParsedDate, DateUtil.MM_DD_YYYY_HH_MM_PATTERN);
+
 
         Check check = new Check.Builder()
                 .id(checkTree.path("id").longValue())
                 .employee(employee)
                 .products(productList)
                 .date(parsedDate)
-                .sum(checkService.countSum(productList))
+                .sum(checkTree.path("sum").doubleValue())
                 .status(CheckStatus.valueOf(checkTree.path("status").asText()))
                 .build();
 
@@ -155,11 +151,11 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
 
         Employee employee = checkEmployee(check, response);
 
-        if (employee == null){
+        if (employee == null) {
             return "";
         }
 
-        if (!checkProductsQuantity(check, response)) {
+        if (!checkProductsQuantity(check, null, response)) {
             return "";
         }
 
@@ -178,8 +174,10 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
             check = checkService.create(check);
 
             for (Product p : checkProducts) {
-                productService.update(p);
-                checkService.addProduct(check.getId(), p.getId(), p.getBoughtQuantity());
+                if (p.getBoughtQuantity() != 0) {
+                    productService.update(p);
+                    checkService.addProduct(check.getId(), p.getId(), p.getBoughtQuantity());
+                }
             }
 
             tm.commit();
@@ -203,11 +201,11 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
             return "";
         }
 
-        if (!checkProductsQuantity(newCheck, response)) {
+        Check currentCheck = checkService.findById(newCheck.getId());
+        if (!checkProductsQuantity(newCheck, currentCheck, response)) {
             return "";
         }
 
-        Check currentCheck = checkService.findById(newCheck.getId());
         List<Product> currentCheckProducts = currentCheck.getProducts();
         List<Product> productsToUpdate = new ArrayList<>();
 
@@ -314,18 +312,37 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
         return employee;
     }
 
-    private boolean checkProductsQuantity(Check check, HttpServletResponse response) throws DaoException, IOException {
+    private boolean checkProductsQuantity(Check newCheck, Check currentCheck, HttpServletResponse response) throws DaoException, IOException {
         List<Product> unavailableProducts = new ArrayList<>();
+        for (Product p : newCheck.getProducts()) {
+            if (p.getBoughtQuantity() == 0)
+                continue;
 
-        for (Product p : check.getProducts()) {
-            Product currentProduct = productService.findById(p.getId());
-            if (currentProduct.getQuantityOnStock() < p.getQuantityOnStock()) {
-                unavailableProducts.add(p);
+
+            Product pInCurrentCheck = null;
+
+            if (currentCheck != null) {
+                pInCurrentCheck = currentCheck.getProducts().stream()
+                        .filter(cp -> cp.getId().equals(p.getId())).findFirst().orElse(null);
+            }
+
+            Product actualProduct;
+            if (pInCurrentCheck != null) {
+                actualProduct = productService.findById(pInCurrentCheck.getId());
+                int quantityAdded =  p.getBoughtQuantity() - pInCurrentCheck.getBoughtQuantity();
+                if (quantityAdded > 0 && actualProduct.getQuantityOnStock() < quantityAdded) {
+                    unavailableProducts.add(p);
+                }
+            } else {
+                actualProduct = productService.findById(p.getId());
+                if (actualProduct.getQuantityOnStock() < p.getBoughtQuantity()) {
+                    unavailableProducts.add(p);
+                }
             }
         }
 
         if (unavailableProducts.size() > 0) {
-            String json = constructFullJson(check);
+            String json = constructFullJson(newCheck);
             Map<String, String> errors = new HashMap<>();
             errors.put("unavailableProducts", Internationalization.getText("error.such.products.unavailable"));
             String errorsJson = JsonUtil.createJson(errors);

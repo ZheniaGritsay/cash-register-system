@@ -44,7 +44,7 @@ public class TableTag extends SimpleTagSupport {
             fields = getFields(entity);
             jspWriter.write("<tr>");
             fields.forEach(f -> {
-                if (excludeFields.isEmpty() &&excludeFields.contains(f.getName()))
+                if (!excludeFields.isEmpty() && excludeFields.contains(f.getName()))
                     return;
 
                 try {

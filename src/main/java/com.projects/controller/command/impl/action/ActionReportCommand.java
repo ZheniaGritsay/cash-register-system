@@ -2,6 +2,7 @@ package com.projects.controller.command.impl.action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.projects.controller.util.DateUtil;
 import com.projects.controller.util.PagesView;
 import com.projects.controller.util.i18n.Internationalization;
 import com.projects.controller.util.json.JsonUtil;
@@ -21,10 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -90,14 +88,30 @@ public class ActionReportCommand extends AbstractActionCommand<Report> {
             checkList.add(check);
         }
 
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm");
+        LocalDateTime parsedSinceDate = null;
+        LocalDateTime parsedUntilDate = null;
+        LocalDateTime parsedCreationDate = null;
+
+        String unParsedSinceDate = reportTree.path("sinceDate").asText();
+        String unParsedUntilDate = reportTree.path("untilDate").asText();
+        String unParsedCreationDate = reportTree.path("creationDate").asText();
+
+        if (DateUtil.dateConforms(unParsedSinceDate, DateUtil.MM_DD_YYYY_HH_MM_REGEX))
+            parsedSinceDate = DateUtil.parseDate(unParsedSinceDate, DateUtil.MM_DD_YYYY_HH_MM_PATTERN);
+
+        if (DateUtil.dateConforms(unParsedUntilDate, DateUtil.MM_DD_YYYY_HH_MM_REGEX))
+            parsedUntilDate = DateUtil.parseDate(unParsedUntilDate, DateUtil.MM_DD_YYYY_HH_MM_PATTERN);
+
+        if (DateUtil.dateConforms(unParsedCreationDate, DateUtil.MM_DD_YYYY_HH_MM_REGEX))
+            parsedCreationDate = DateUtil.parseDate(unParsedCreationDate, DateUtil.MM_DD_YYYY_HH_MM_PATTERN);
+
         Report report = new Report.Builder()
                 .id(reportTree.path("id").longValue())
-                .since(LocalDateTime.parse(reportTree.path("sinceDate").asText(), dtf))
-                .until(LocalDateTime.parse(reportTree.path("untilDate").asText(), dtf))
+                .since(parsedSinceDate)
+                .until(parsedUntilDate)
                 .checks(checkList)
                 .totalSum(reportTree.path("totalSum").doubleValue())
-                .creationDate(LocalDateTime.parse(reportTree.path("creationDate").asText(), dtf))
+                .creationDate(parsedCreationDate)
                 .type(ReportType.valueOf(reportTree.path("type").textValue()))
                 .build();
 
@@ -108,6 +122,11 @@ public class ActionReportCommand extends AbstractActionCommand<Report> {
     @Override
     protected String createAction(HttpServletRequest request, HttpServletResponse response) throws DaoException, IOException {
         Report report = getEntityForUpdateCreate(request);
+
+        if (checkForViolations(report, response)) {
+            return "";
+        }
+
         TransactionManager tm = TransactionManagerService.getTransactionManager();
         try {
             tm.begin();
@@ -141,22 +160,26 @@ public class ActionReportCommand extends AbstractActionCommand<Report> {
         }
 
         Report currentReport = reportService.findById(newReport.getId());
-        List<Check> currentCheckProducts = currentReport.getChecks();
+        List<Check> currentReportChecks = currentReport.getChecks();
 
         TransactionManager tm = TransactionManagerService.getTransactionManager();
         try {
             tm.begin();
 
-            for (Check check : newReport.getChecks()) {
-                boolean presentInCurrentReport = currentCheckProducts.stream().anyMatch(c -> c.getId().equals(check.getId()));
-                boolean presentInNewReport = newReport.getChecks().stream().anyMatch(c -> c.getId().equals(check.getId()));
+            List<Check> checksToAdd = newReport.getChecks().stream()
+                    .filter(c -> currentReportChecks.stream().noneMatch(current -> current.getId().equals(c.getId())))
+                    .collect(Collectors.toList());
 
-                if (!presentInCurrentReport) {
-                    reportService.addCheck(newReport.getId(), check.getId());
-                }
-                if (!presentInNewReport) {
-                    reportService.removeCheck(newReport.getId(), check.getId());
-                }
+            List<Check> checksToRemove = currentReportChecks.stream()
+                    .filter(currentCh -> newReport.getChecks().stream().noneMatch(c -> c.getId().equals(currentCh.getId())))
+                    .collect(Collectors.toList());
+
+
+            for (Check check : checksToAdd) {
+                reportService.addCheck(newReport.getId(), check.getId());
+            }
+            for (Check c : checksToRemove) {
+                reportService.removeCheck(newReport.getId(), c.getId());
             }
 
             reportService.update(newReport);

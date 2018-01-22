@@ -18,7 +18,7 @@ public class Report extends Entity {
     @NotNull(message = "error.not.null")
     private final List<Check> checks;
 
-    @DecimalMin(message = "error.lt.zero")
+    @DecimalMin(value =  1, message = "error.lt.zero")
     private final Double totalSum;
 
     @NotNull(message = "error.not.null")

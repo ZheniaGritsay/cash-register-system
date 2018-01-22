@@ -86,6 +86,7 @@ public class ActionProductCommand extends AbstractActionCommand<Product> {
                 .code(productTree.path("code").longValue())
                 .price(productTree.path("price").doubleValue())
                 .quantityType(QuantityType.valueOf(productTree.path("quantityType").textValue()))
+                .boughtQuantity(productTree.path("quantityType").intValue())
                 .quantityOnStock(productTree.path("quantityOnStock").intValue())
                 .image(img)
                 .build();

@@ -20,6 +20,7 @@ import com.projects.model.validation.impl.ValidatorFactoryImpl;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class EditAccountCommand implements Command {
     private UserService userService = ServiceFactoryImpl.getInstance().getUserService();
@@ -33,6 +34,15 @@ public class EditAccountCommand implements Command {
             User user = userService.findById(userId);
             List<Check> employeesChecks = checkService.findAllByEmployeeId(user.getEmployee().getId());
 
+            employeesChecks = employeesChecks.stream().map(ec -> new Check.Builder()
+                    .id(ec.getId())
+                    .employee(ec.getEmployee())
+                    .products(null)
+                    .sum(ec.getSum())
+                    .date(ec.getDate())
+                    .status(ec.getStatus())
+                    .build()).collect(Collectors.toList());
+
             if (request.getMethod().equals("GET")) {
 
                 request.setAttribute("user", user);
@@ -40,7 +50,7 @@ public class EditAccountCommand implements Command {
 
                 request.setAttribute("employeesChecks", employeesChecks);
                 request.setAttribute("excludeFields",
-                        Arrays.asList("products", "productDao", "productList", "logger"));
+                        Arrays.asList("products", "employee"));
 
                 return PagesView.EDIT_PROFILE;
             }
@@ -76,7 +86,7 @@ public class EditAccountCommand implements Command {
 
             request.setAttribute("employeesChecks", employeesChecks);
             request.setAttribute("excludeFields",
-                    Arrays.asList("products", "productDao", "productList", "logger"));
+                    Arrays.asList("products", "employee"));
         } catch (DaoException e) {
             throw new InternalServerException(e);
         }

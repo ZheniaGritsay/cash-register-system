@@ -6,7 +6,7 @@ import com.projects.model.dao.AbstractDao;
 import com.projects.model.dao.PreparedStatementConfig;
 import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.Entity;
-import com.projects.util.SQLQueries;
+import com.projects.model.util.SQLQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

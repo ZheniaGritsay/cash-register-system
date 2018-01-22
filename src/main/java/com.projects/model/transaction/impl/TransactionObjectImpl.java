@@ -4,14 +4,14 @@ import com.projects.model.transaction.ConnectionHolder;
 import com.projects.model.transaction.Status;
 import com.projects.model.transaction.TransactionObject;
 import com.projects.model.transaction.exception.TransactionException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class TransactionObjectImpl implements TransactionObject {
-    private static final Logger logger = LogManager.getLogger(TransactionObjectImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransactionObjectImpl.class);
     private ConnectionHolder connectionHolder;
     private int transactionIsolation;
     private Status status;

@@ -4,7 +4,7 @@ import com.projects.model.dao.UserDao;
 import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.dto.User;
 import com.projects.model.service.UserService;
-import com.projects.util.Encryptor;
+import com.projects.model.util.Encryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

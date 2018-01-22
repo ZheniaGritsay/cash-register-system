@@ -4,14 +4,10 @@ import com.projects.model.dao.ProductDao;
 import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.constant.QuantityType;
 import com.projects.model.domain.dto.Product;
-import com.projects.util.SQLQueries;
-import org.postgresql.jdbc.PgBlob;
+import com.projects.model.util.SQLQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.rowset.serial.SerialBlob;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

@@ -6,11 +6,10 @@ import com.projects.model.domain.constant.Position;
 import com.projects.model.domain.constant.Role;
 import com.projects.model.domain.dto.Employee;
 import com.projects.model.domain.dto.User;
-import com.projects.util.SQLQueries;
+import com.projects.model.util.SQLQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,6 +56,7 @@ public class JdbcUserDaoImpl extends JdbcAbstractDaoImpl<User, Long> implements 
                         .id(resultSet.getLong("employee_id"))
                         .firstName(resultSet.getString("first_name"))
                         .lastName(resultSet.getString("last_name"))
+                        .email(resultSet.getString("email"))
                         .salary(resultSet.getDouble("salary"))
                         .position(Position.values()[resultSet.getInt("position_id")])
                         .build();
@@ -65,8 +65,7 @@ public class JdbcUserDaoImpl extends JdbcAbstractDaoImpl<User, Long> implements 
                         resultSet.getString("login"),
                         resultSet.getString("password"),
                         Role.values()[resultSet.getInt("role_id")],
-                        employee
-                );
+                        employee);
 
                 userList.add(user);
             }

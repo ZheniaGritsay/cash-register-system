@@ -18,8 +18,8 @@
 <div class="container">
     <div class="row">
         <div class="col-md-4"></div>
-        <div class="col-md-4">
-            <h3 style="position: relative; left: 80px"><fmt:message key="error.404" bundle="${bundle}"/></h3>
+        <div class="col-md-4 text-center">
+            <h3><fmt:message key="error.404" bundle="${bundle}"/></h3>
             <img src="../../../resources/image/errors/404.jpg" width="300" height="200">
         </div>
         <div class="col-md-4"></div>

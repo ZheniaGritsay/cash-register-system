@@ -30,114 +30,101 @@
                     </option>
                 </select>
             </form>
-            <div class="card-header"><fmt:message key="title.registration" bundle="${bundle}"/></div>
-            <div class="card-body">
-                <c:if test="${errors}">
-                    <div class="alert alert-danger">
-                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                        <div>
-                            <c:if test="${not empty firstNameError}">
-                                <fmt:message key="label.first.name" bundle="${bundle}"/>&nbsp;
-                                <fmt:message key="${firstNameError}" bundle="${bundle}"/>
-                            </c:if>
-                        </div>
-                        <div>
-                            <c:if test="${not empty lastNameError}">
-                                <fmt:message key="label.last.name" bundle="${bundle}"/>&nbsp;
-                                <fmt:message key="${lastNameError}" bundle="${bundle}"/>
-                            </c:if>
-                        </div>
-                        <div>
-                            <c:if test="${not empty emailError}">
-                                <fmt:message key="label.email" bundle="${bundle}"/>&nbsp;
-                                <fmt:message key="${emailError}" bundle="${bundle}"/>
-                            </c:if>
-                        </div>
-                    </div>
-                </c:if>
-                <form action="${pageContext.request.contextPath}/app/edit-account" method="post" style="width: 100%">
-                    <div class="form-group">
-                        <div class="input-group">
-                        <span class="input-group-prepend">
-                        <span class="input-group-text">
-                        <i class="fa fa-user"></i>
-                        </span>
-                        </span>
-                            <%--<label for="login"><fmt:message key="label.login" bundle="${bundle}"/></label>--%>
-                            <input type="text" class="form-control" id="login" name="login"
-                                   value="<c:out value="${user.login}"/>" disabled/>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                            <span class="input-group-prepend">
-                                <span class="input-group-text">
-                                    <i class="fa fa-user"></i>
+            <div class="well">
+                <div class="card">
+                    <div class="card-header"><fmt:message key="label.account" bundle="${bundle}"/></div>
+                    <div class="card-body">
+                        <c:if test="${errors}">
+                            <div class="alert alert-danger">
+                                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                                <div>
+                                    <c:if test="${not empty firstNameError}">
+                                        <fmt:message key="label.first.name" bundle="${bundle}"/>&nbsp;
+                                        <fmt:message key="${firstNameError}" bundle="${bundle}"/>
+                                    </c:if>
+                                </div>
+                                <div>
+                                    <c:if test="${not empty lastNameError}">
+                                        <fmt:message key="label.last.name" bundle="${bundle}"/>&nbsp;
+                                        <fmt:message key="${lastNameError}" bundle="${bundle}"/>
+                                    </c:if>
+                                </div>
+                                <div>
+                                    <c:if test="${not empty emailError}">
+                                        <fmt:message key="label.email" bundle="${bundle}"/>&nbsp;
+                                        <fmt:message key="${emailError}" bundle="${bundle}"/>
+                                    </c:if>
+                                </div>
+                            </div>
+                        </c:if>
+                        <form action="${pageContext.request.contextPath}/app/edit-account" method="post">
+                            <div class="input-group">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fa fa-user fa-1x"></i>
+                                    </span>
                                 </span>
-                            </span>
-                            <%--<label for="firstName"><fmt:message key="label.first.name" bundle="${bundle}"/></label>--%>
-                            <input type="text" class="form-control" id="firstName" name="firstName"
-                                   value="<c:out value="${employee.firstName}"/>">
-                        </div>
+                                <input type="text" class="form-control" id="login" name="login"
+                                       value="<c:out value="${user.login}"/>" disabled>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fa fa-user fa-1x"></i>
+                                    </span>
+                                </span>
+                                <input type="text" class="form-control" name="firstName"
+                                       value="<c:out value="${employee.firstName}"/>">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fa fa-user fa-1x"></i>
+                                    </span>
+                                </span>
+                                <input type="text" class="form-control" name="lastName"
+                                       value="<c:out value="${employee.lastName}"/>">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fa fa-envelope fa-1x"></i>
+                                    </span>
+                                </span>
+                                <input type="email" class="form-control" name="email" id="email"
+                                       value="<c:out value="${employee.email}"/>">
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fa fa-money fa-1x"></i>
+                                    </span>
+                                </span>
+                                <input type="number" class="form-control" name="salary" id="salary"
+                                       value="<c:out value="${employee.salary}"/>" disabled>
+                            </div>
+                            <div class="input-group">
+                                <span class="input-group-prepend">
+                                    <span class="input-group-text">
+                                        <i class="fa fa-briefcase fa-1x"></i>
+                                    </span>
+                                </span>
+                                <input type="text" class="form-control" name="position" id="position"
+                                       value="<c:out value="${employee.position}"/>" disabled>
+                            </div>
+                            <input type="submit" class="btn btn-outline-primary mt-md-3"
+                                   value="<fmt:message key="button.save" bundle="${bundle}"/>">
+                        </form>
                     </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                        <span class="input-group-prepend">
-                        <span class="input-group-text">
-                        <i class="fa fa-user"></i>
-                        </span>
-                        </span>
-                            <%--<label for="lastName"><fmt:message key="label.last.name" bundle="${bundle}"/></label>--%>
-                            <input type="text" class="form-control" id="lastName" name="lastName"
-                                   value="<c:out value="${employee.lastName}"/>">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                        <span class="input-group-prepend">
-                        <span class="input-group-text">
-                        <i class="fa fa-envelope"></i>
-                        </span>
-                        </span>
-                            <%--<label for="email"><fmt:message key="label.email" bundle="${bundle}"/></label>--%>
-                            <input type="email" class="form-control" id="email" name="email"
-                                   value="<c:out value="${employee.email}"/>">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                        <span class="input-group-prepend">
-                            <span class="input-group-text">
-                            <i class="fa fa-money"></i>
-                            </span>
-                        </span>
-                            <%--<label for="salary"><fmt:message key="label.email" bundle="${bundle}"/></label>--%>
-                            <input type="number" class="form-control" id="salary" name="salary"
-                                   value="<c:out value="${employee.salary}"/>" disabled>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="input-group">
-                        <span class="input-group-prepend">
-                        <span class="input-group-text">
-                        <i class="fa fa-briefcase"></i>
-                        </span>
-                        </span>
-                            <%--<label for="email"><fmt:message key="label.email" bundle="${bundle}"/></label>--%>
-                            <input type="text" class="form-control" id="position" name="position"
-                                   value="<c:out value="${employee.position}"/>" disabled>
-                        </div>
-                    </div>
-                    <input type="submit" class="btn btn-outline-primary"
-                           value="<fmt:message key="button.save" bundle="${bundle}"/>">
-                </form>
+                </div>
             </div>
-
         </div>
-        <c:if test="${employee.position eq 'CASHIER' || employee.position eq 'SENIOR_CASHIER'}">
-        <div class="col-md-6" style="max-height: 500px; overflow: auto">
-            <et:entityTable entities="${employeesChecks}" excludeFields="${excludeFields}"/>
-        </div>
+        <c:if test="${not empty employeesChecks}">
+            <div class="col-md-6 mt-md-5 ml-md-5" style="max-height: 500px; overflow: auto">
+                <div class="well">
+                    <et:entityTable entities="${employeesChecks}" excludeFields="${excludeFields}"/>
+                </div>
+            </div>
         </c:if>
     </div>
 </div>

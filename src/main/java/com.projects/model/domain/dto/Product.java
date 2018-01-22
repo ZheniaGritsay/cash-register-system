@@ -14,7 +14,7 @@ public class Product extends Entity {
     @Min(message = "error.lt.zero")
     private final Long code;
 
-    @DecimalMin(value = 1.00, message = "error.lt.zero")
+    @DecimalMin(value = 1.00, message = "error.lt.one")
     private final Double price;
 
     @NotNull(message = "error.not.null")

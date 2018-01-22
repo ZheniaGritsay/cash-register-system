@@ -27,7 +27,7 @@ public class AccessFilter implements Filter {
         String httpMethod = req.getMethod();
 
         boolean proceed = true;
-        if (userId == null && path.matches("^/(home/.+)|(edit-account)$")) {
+        if (userId == null && path.matches("^/(home.*)|(edit-account)$")) {
             resp.sendError(401);
             proceed = false;
         } else {

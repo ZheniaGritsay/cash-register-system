@@ -18,13 +18,12 @@ import com.projects.model.validation.Validator;
 import com.projects.model.validation.Violation;
 import com.projects.model.validation.exception.ValidationException;
 import com.projects.model.validation.impl.ValidatorFactoryImpl;
-import com.projects.util.Encryptor;
+import com.projects.model.util.Encryptor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.util.*;
 import java.util.stream.Stream;
 

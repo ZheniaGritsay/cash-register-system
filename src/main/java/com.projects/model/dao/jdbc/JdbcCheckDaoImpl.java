@@ -6,14 +6,12 @@ import com.projects.model.domain.constant.CheckStatus;
 import com.projects.model.domain.constant.Position;
 import com.projects.model.domain.dto.Check;
 import com.projects.model.domain.dto.Employee;
-import com.projects.model.domain.dto.Product;
 import com.projects.model.holders.CheckHolder;
-import com.projects.util.SQLQueries;
+import com.projects.model.util.SQLQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

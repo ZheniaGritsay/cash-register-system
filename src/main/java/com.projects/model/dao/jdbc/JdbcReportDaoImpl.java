@@ -3,10 +3,9 @@ package com.projects.model.dao.jdbc;
 import com.projects.model.dao.ReportDao;
 import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.constant.ReportType;
-import com.projects.model.domain.dto.Check;
 import com.projects.model.domain.dto.Report;
 import com.projects.model.holders.ReportHolder;
-import com.projects.util.SQLQueries;
+import com.projects.model.util.SQLQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

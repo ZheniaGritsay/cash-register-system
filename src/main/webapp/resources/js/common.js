@@ -53,7 +53,7 @@ const saveEmployee = (event) => {
         firstName: $('#firstName').val(),
         lastName: $('#lastName').val(),
         email: $('#email').val(),
-        salary: Number.parseFloat($('salary').val()),
+        salary: Number.parseFloat($('#salary').val()),
         position: $('#position').val()
     };
 
@@ -1694,8 +1694,8 @@ const employeeForm = (employee, messages, htmlElem, errors) => {
             <input type="text" class="form-control" name="salary" id="salary" value="${employee !== undefined ? employee.salary : ''}">
         </div>
         <div class="form-group">
-            <label for="position">${messages.type}</label>
-            <select id="type" name="type" class="form-control">
+            <label for="position">${messages.position}</label>
+            <select name="position" id="position" class="form-control">
                 <option value="CASHIER" ${employee !== undefined ? employee.position === 'CASHIER' ? 'selected' : '' : 'selected'}>cashier</option>
                 <option value="SENIOR_CASHIER" ${employee !== undefined ? employee.position === 'SENIOR_CASHIER' ? 'selected' : '' : ''}>senior cashier</option>
                 <option value="COMMODITIES_EXPERT" ${employee !== undefined ? employee.position === 'COMMODITIES_EXPERT' ? 'selected' : '' : ''}>commodities expert</option>

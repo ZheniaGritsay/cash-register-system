@@ -1,4 +1,4 @@
-package com.projects.util;
+package com.projects.model.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

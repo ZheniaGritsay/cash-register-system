@@ -13,14 +13,7 @@
     <meta charset="UTF-8">
     <%@include file="parts/set-lang.jspf" %>
     <title><fmt:message key="title.registration" bundle="${bundle}"/></title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"
-          integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
-            integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4"
-            crossorigin="anonymous"></script>
-    <script src="https://use.fontawesome.com/61c4da9bba.js"></script>
-    <link rel="stylesheet" href="../../resources/css/common.css">
+    <%@include file="parts/header.jspf"%>
 </head>
 <body>
 <c:if test="${not empty redirect}">
@@ -28,18 +21,20 @@
 </c:if>
 <%@include file="parts/jumborton.jspf" %>
 <div class="container">
-    <form class="form-inline my-2 my-lg-0 mr-md-3 mb-md-3">
-        <select class="form-control" id="language" name="language" onchange="submit()">
-            <option value="en_US" ${language == 'en_US' ? 'selected' : ''}>
-                <fmt:message key="label.english" bundle="${bundle}"/>
-            </option>
-            <option value="ru_RU" ${language == 'ru_RU' ? 'selected' : ''}>
-                <fmt:message key="label.russian" bundle="${bundle}"/>
-            </option>
-        </select>
-    </form>
     <div class="card mt-md-3" style="width: 50%">
-        <div class="card-header"><fmt:message key="title.registration" bundle="${bundle}"/></div>
+        <div class="card-header" style="position: relative">
+            <fmt:message key="title.registration" bundle="${bundle}"/>
+            <form class="form-inline" style="position: relative; left: 70%; display: inline">
+                <select class="form-control" id="language" name="language" onchange="submit()">
+                    <option value="en_US" ${language == 'en_US' ? 'selected' : ''}>
+                        <fmt:message key="label.english" bundle="${bundle}"/>
+                    </option>
+                    <option value="ru_RU" ${language == 'ru_RU' ? 'selected' : ''}>
+                        <fmt:message key="label.russian" bundle="${bundle}"/>
+                    </option>
+                </select>
+            </form>
+        </div>
         <div class="card-body">
             <c:if test="${errors || loginExists}">
                 <div class="alert alert-danger">
@@ -82,31 +77,46 @@
             <form action="${pageContext.request.contextPath}/app/registration" method="post">
                 <div class="input-group">
                             <span class="input-group-prepend">
-                                <span class="input-group-text"><i class="fa fa-user fa-fw"></i></span></span>
-                    <input type="text" class="form-control" id="login" name="login" value="<c:out value="${login}"/>"
+                                <span class="input-group-text">
+                                    <i class="fa fa-user fa-1x"></i>
+                                </span>
+                            </span>
+                    <input type="text" class="form-control" id="login" name="login"
                            placeholder="<fmt:message key="label.login" bundle="${bundle}" />">
                 </div>
                 <div class="input-group">
                     <span class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-lock fa-fw"></i></span></span>
+                        <span class="input-group-text">
+                            <i class="fa fa-lock fa-1x"></i>
+                        </span>
+                    </span>
                     <input type="password" class="form-control" name="password" value="<c:out value="${password}"/>"
                            placeholder="<fmt:message key="label.password" bundle="${bundle}"/>"/>
                 </div>
                 <div class="input-group">
                     <span class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-user fa-fw"></i></span></span>
+                        <span class="input-group-text">
+                            <i class="fa fa-user fa-1x"></i>
+                        </span>
+                    </span>
                     <input type="text" class="form-control" name="firstName" value="<c:out value="${firstName}"/>"
                            placeholder="<fmt:message key="label.first.name" bundle="${bundle}"/>">
                 </div>
                 <div class="input-group">
                     <span class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-user fa-fw"></i></span></span>
+                        <span class="input-group-text">
+                            <i class="fa fa-user fa-1x"></i>
+                        </span>
+                    </span>
                     <input type="text" class="form-control" name="lastName" value="<c:out value="${lastName}"/>"
                            placeholder="<fmt:message key="label.last.name" bundle="${bundle}"/>">
                 </div>
                 <div class="input-group">
                     <span class="input-group-prepend">
-                        <span class="input-group-text"><i class="fa fa-envelope fa-fw"></i></span></span>
+                        <span class="input-group-text">
+                            <i class="fa fa-envelope fa-1x"></i>
+                        </span>
+                    </span>
                     <input type="email" class="form-control" name="email" value="<c:out value="${email}"/>"
                            placeholder="<fmt:message key="label.email" bundle="${bundle}"/>">
                 </div>

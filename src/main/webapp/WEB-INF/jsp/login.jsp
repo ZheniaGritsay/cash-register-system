@@ -12,16 +12,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <%@include file="parts/set-lang.jspf"%>
+    <%@include file="parts/set-lang.jspf" %>
     <title><fmt:message key="title.login" bundle="${bundle}"/></title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"
-          integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"
-            integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4"
-            crossorigin="anonymous"></script>
-    <script src="https://use.fontawesome.com/61c4da9bba.js"></script>
-    <link rel="stylesheet" href="../../resources/css/common.css">
+    <%@include file="parts/header.jspf" %>
 </head>
 <body>
 <c:if test="${not empty redirect}">
@@ -31,18 +24,7 @@
 <div class="container mt-sm-5">
 </div>
 <div class="row">
-    <div class="col-sm-4">
-        <%--<form class="form-inline" style="margin-left: 65%">--%>
-            <%--<select class="form-control" id="language" name="language" onchange="submit()">--%>
-                <%--<option value="en_US" ${language == 'en_US' ? 'selected' : ''}>--%>
-                    <%--<fmt:message key="label.english" bundle="${bundle}"/>--%>
-                <%--</option>--%>
-                <%--<option value="ru_RU" ${language == 'ru_RU' ? 'selected' : ''}>--%>
-                    <%--<fmt:message key="label.russian" bundle="${bundle}"/>--%>
-                <%--</option>--%>
-            <%--</select>--%>
-        <%--</form>--%>
-    </div>
+    <div class="col-sm-4"></div>
     <div class="col-sm-4">
         <div class="card">
             <div class="card-header" style="position: relative">

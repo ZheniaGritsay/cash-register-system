@@ -4,6 +4,7 @@ import com.projects.controller.command.Command;
 import com.projects.controller.exception.InternalServerException;
 import com.projects.controller.util.PagesView;
 import com.projects.model.dao.exception.DaoException;
+import com.projects.model.domain.constant.Position;
 import com.projects.model.domain.dto.Check;
 import com.projects.model.domain.dto.Employee;
 import com.projects.model.domain.dto.User;
@@ -31,26 +32,32 @@ public class EditAccountCommand implements Command {
     public String execute(HttpServletRequest request, HttpServletResponse response) throws InternalServerException {
         try {
             Long userId = (Long) request.getSession().getAttribute("userId");
+            Position position = (Position) request.getSession().getAttribute("employeePosition");
             User user = userService.findById(userId);
-            List<Check> employeesChecks = checkService.findAllByEmployeeId(user.getEmployee().getId());
+            List<Check> employeesChecks = null;
 
-            employeesChecks = employeesChecks.stream().map(ec -> new Check.Builder()
-                    .id(ec.getId())
-                    .employee(ec.getEmployee())
-                    .products(null)
-                    .sum(ec.getSum())
-                    .date(ec.getDate())
-                    .status(ec.getStatus())
-                    .build()).collect(Collectors.toList());
+            if (position == Position.CASHIER || position == Position.SENIOR_CASHIER) {
+                employeesChecks = checkService.findAllByEmployeeId(user.getEmployee().getId());
+                employeesChecks = employeesChecks.stream().map(ec -> new Check.Builder()
+                        .id(ec.getId())
+                        .employee(ec.getEmployee())
+                        .products(null)
+                        .sum(ec.getSum())
+                        .date(ec.getDate())
+                        .status(ec.getStatus())
+                        .build()).collect(Collectors.toList());
+            }
 
             if (request.getMethod().equals("GET")) {
 
                 request.setAttribute("user", user);
                 request.setAttribute("employee", user.getEmployee());
 
-                request.setAttribute("employeesChecks", employeesChecks);
-                request.setAttribute("excludeFields",
-                        Arrays.asList("products", "employee"));
+                if (employeesChecks != null) {
+                    request.setAttribute("employeesChecks", employeesChecks);
+                    request.setAttribute("excludeFields",
+                            Arrays.asList("products", "employee"));
+                }
 
                 return PagesView.EDIT_PROFILE;
             }
@@ -75,6 +82,7 @@ public class EditAccountCommand implements Command {
 
             if (!employeeViolations.isEmpty()) {
                 employeeViolations.forEach(v -> request.setAttribute(v.getField() + "Error", v.getMessage()));
+                request.setAttribute("errors", true);
             } else {
                 employeeService.update(employee);
                 employee = employeeService.findById(employee.getId());
@@ -84,9 +92,11 @@ public class EditAccountCommand implements Command {
             request.setAttribute("employee", employee);
             request.setAttribute("user", user);
 
-            request.setAttribute("employeesChecks", employeesChecks);
-            request.setAttribute("excludeFields",
-                    Arrays.asList("products", "employee"));
+            if (employeesChecks != null) {
+                request.setAttribute("employeesChecks", employeesChecks);
+                request.setAttribute("excludeFields",
+                        Arrays.asList("products", "employee"));
+            }
         } catch (DaoException e) {
             throw new InternalServerException(e);
         }

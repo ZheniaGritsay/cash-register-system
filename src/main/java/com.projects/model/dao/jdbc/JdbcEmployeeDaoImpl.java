@@ -4,11 +4,10 @@ import com.projects.model.dao.EmployeeDao;
 import com.projects.model.dao.exception.DaoException;
 import com.projects.model.domain.constant.Position;
 import com.projects.model.domain.dto.Employee;
-import com.projects.util.SQLQueries;
+import com.projects.model.util.SQLQueries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;

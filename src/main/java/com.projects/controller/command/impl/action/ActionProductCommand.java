@@ -44,7 +44,7 @@ public class ActionProductCommand extends AbstractActionCommand<Product> {
 
     @Override
     int getDefaultRecordsPerPage() {
-        return 3;
+        return 5;
     }
 
     @Override

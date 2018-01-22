@@ -3,14 +3,14 @@ package com.projects.model.transaction.impl;
 import com.projects.model.connection.impl.ConnectionFactoryImpl;
 import com.projects.model.transaction.ConnectionHolder;
 import com.projects.model.transaction.exception.TransactionException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class ConnectionHolderImpl implements ConnectionHolder {
-    private static final Logger logger = LogManager.getLogger(ConnectionHolderImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConnectionHolderImpl.class);
     private Connection currentConnection;
     private boolean transactionActive;
 
@@ -42,5 +42,6 @@ public class ConnectionHolderImpl implements ConnectionHolder {
             logger.error("failed to close transaction connection: " + e.getMessage());
             throw new TransactionException("unable to close connection", e);
         }
+        currentConnection = null;
     }
 }

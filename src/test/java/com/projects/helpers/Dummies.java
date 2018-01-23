@@ -54,7 +54,7 @@ public class Dummies {
                 .price(2.5)
                 .quantityType(QuantityType.GRAM)
                 .quantityOnStock(5000)
-                .boughtQuantity(0)
+                .boughtQuantity(3)
                 .image(new byte[0])
                 .build();
     }

@@ -48,8 +48,7 @@ public class ReportServiceImpl extends AbstractServiceImpl<ReportDao, Report, Lo
 
     @Override
     public double countTotalSum(List<Check> checks) {
-        double totalSum = checks.stream().flatMap(check -> check.getProducts().stream())
-                .mapToDouble(Product::getPrice).sum();
+        double totalSum = checks.stream().mapToDouble(Check::getSum).sum();
         logger.info("counted total sum of the checks");
         return totalSum;
     }

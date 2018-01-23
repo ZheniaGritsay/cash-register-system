@@ -70,7 +70,7 @@ CREATE TABLE checks_products (
 );
 
 CREATE TABLE reports_checks (
-	report_id bigint REFERENCES reports (id),
+	report_id bigint REFERENCES reports (id) ON DELETE CASCADE,
 	check_id bigint REFERENCES checks (id),
 	PRIMARY KEY (report_id, check_id)
 );

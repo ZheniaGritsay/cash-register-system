@@ -60,12 +60,19 @@
                                 <input type="number" class="form-control col-sm-8" id="quantity" name="quantity"
                                        placeholder="0">
                             </div>
-                            <div class="form-row">
+                            <div class="form-row mb-md-2">
                                 <label class="col-sm-4" for="price">
-                                    <fmt:message key="label.price" bundle="${bundle}"/>
+                                    <fmt:message key="label.price" bundle="${bundle}"/> USD
                                 </label>
                                 <input type="number" class="form-control col-sm-8" id="price" name="price"
                                        value="<c:out value="${product.price}"/>" disabled>
+                            </div>
+                            <div class="form-row">
+                                <label class="col-sm-4" for="quantityT">
+                                        <fmt:message key="label.quantity.type" bundle="${bundle}"/>
+                                </label>
+                                <input type="text" class="form-control col-sm-8" id="quantityT" name="quantityT"
+                                       value="${product.quantityType}" disabled>
                             </div>
                         </form>
                         <input id="id" name="id" type="hidden" value="<c:out value="${product.id}"/>">
@@ -105,12 +112,19 @@
                                 <input type="number" class="form-control col-sm-8" id="quantity-2" name="quantity"
                                        placeholder="0">
                             </div>
-                            <div class="form-row">
+                            <div class="form-row  mb-md-2">
                                 <label class="col-sm-4" for="price-2">
-                                    <fmt:message key="label.price" bundle="${bundle}"/>
+                                    <fmt:message key="label.price" bundle="${bundle}"/> USD
                                 </label>
                                 <input type="number" class="form-control col-sm-8" id="price-2" name="price"
                                        value="<c:out value="${product.price}"/>" disabled>
+                            </div>
+                            <div class="form-row">
+                                <label class="col-sm-4" for="quantityT-2">
+                                    <fmt:message key="label.quantity.type" bundle="${bundle}"/>
+                                </label>
+                                <input type="text" class="form-control col-sm-8" id="quantityT-2" name="quantityT-2"
+                                       value="${product.quantityType}" disabled>
                             </div>
                         </form>
                         <input id="id-2" name="id" type="hidden" value="<c:out value="${product.id}"/>">

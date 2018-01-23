@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 public class Encryptor {
     public static final String SHA256 = "SHA-256";
     public static final String SHA1 = "SHA-1";
-    public static final String MD5 = "MD-5";
+    public static final String MD5 = "MD5";
     private static Logger logger = LoggerFactory.getLogger(Encryptor.class);
 
     public static String encrypt(String text, String algorithm) {
@@ -26,7 +26,7 @@ public class Encryptor {
             digestBytes = digest.digest();
 
         } catch (NoSuchAlgorithmException e) {
-            logger.error("failed to encrypt", e);
+            logger.error("failed to encrypt: " + e.getMessage());
         }
 
         if (digestBytes == null) {

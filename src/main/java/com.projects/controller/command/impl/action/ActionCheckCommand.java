@@ -12,7 +12,6 @@ import com.projects.model.domain.constant.QuantityType;
 import com.projects.model.domain.dto.Check;
 import com.projects.model.domain.dto.Employee;
 import com.projects.model.domain.dto.Product;
-import com.projects.model.holders.CheckHolder;
 import com.projects.model.service.AbstractService;
 import com.projects.model.service.CheckService;
 import com.projects.model.service.EmployeeService;
@@ -27,13 +26,8 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Date;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ActionCheckCommand extends AbstractActionCommand<Check> {
     private static Logger logger = LoggerFactory.getLogger(ActionCheckCommand.class);
@@ -78,6 +72,7 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
         messages.put("quantityToRemove", Internationalization.getText("label.quantity.to.remove"));
         messages.put("firstName", Internationalization.getText("label.first.name"));
         messages.put("lastName", Internationalization.getText("label.last.name"));
+        messages.put("checkRestriction", Internationalization.getText("error.check.cannot.be.deleted"));
 
         messages.put("title", Internationalization.getText("label.title"));
         messages.put("code", Internationalization.getText("label.code"));
@@ -215,11 +210,21 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
 
             for (Product product : newCheck.getProducts()) {
                 boolean absentInCurrentCheck = currentCheckProducts.stream().noneMatch(p -> p.getId().equals(product.getId()));
-                boolean quantityOnStockChanged = currentCheckProducts.stream().anyMatch(p -> p.getId().equals(product.getId()) &&
-                        !(p.getQuantityOnStock().equals(product.getQuantityOnStock())));
+                int quantityOnStockChanged = 0;
+                for (Product p : currentCheckProducts) {
+                    if (p.getId().equals(product.getId())) {
+                        quantityOnStockChanged = product.getBoughtQuantity() - p.getBoughtQuantity();
+                        break;
+                    }
+                }
 
-                if (quantityOnStockChanged) {
-                    productsToUpdate.add(product);
+                if (quantityOnStockChanged != 0) {
+                    Product pr = new Product.Builder()
+                            .id(product.getId())
+                            .boughtQuantity(quantityOnStockChanged)
+                            .build();
+
+                    productsToUpdate.add(pr);
                 }
 
                 if (absentInCurrentCheck) {
@@ -227,7 +232,7 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
                     checkService.addProduct(newCheck.getId(), product.getId(), product.getBoughtQuantity());
                 }
 
-                if (quantityOnStockChanged && product.getBoughtQuantity() != 0) {
+                if (quantityOnStockChanged != 0 && product.getBoughtQuantity() != 0) {
                     checkService.updateProductQuantity(product.getBoughtQuantity(), newCheck.getId(), product.getId());
                 }
 
@@ -237,7 +242,25 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
             }
 
             for (Product p : productsToUpdate) {
-                productService.update(p);
+                Product actualProduct = productService.findById(p.getId());
+                int newQuantity;
+                if (p.getBoughtQuantity() < 0)
+                    newQuantity = actualProduct.getQuantityOnStock() + Math.abs(p.getBoughtQuantity());
+                else
+                    newQuantity = actualProduct.getQuantityOnStock() - p.getBoughtQuantity();
+
+                actualProduct = new Product.Builder()
+                        .id(actualProduct.getId())
+                        .title(actualProduct.getTitle())
+                        .code(actualProduct.getCode())
+                        .price(actualProduct.getPrice())
+                        .quantityType(actualProduct.getQuantityType())
+                        .image(actualProduct.getImage())
+                        .boughtQuantity(actualProduct.getBoughtQuantity())
+                        .quantityOnStock(newQuantity)
+                        .build();
+
+                productService.update(actualProduct);
             }
 
             checkService.update(newCheck);
@@ -318,7 +341,6 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
             if (p.getBoughtQuantity() == 0)
                 continue;
 
-
             Product pInCurrentCheck = null;
 
             if (currentCheck != null) {
@@ -327,17 +349,35 @@ public class ActionCheckCommand extends AbstractActionCommand<Check> {
             }
 
             Product actualProduct;
+            boolean addToUnavailable = false;
+            int quantity = p.getBoughtQuantity();
             if (pInCurrentCheck != null) {
                 actualProduct = productService.findById(pInCurrentCheck.getId());
-                int quantityAdded =  p.getBoughtQuantity() - pInCurrentCheck.getBoughtQuantity();
+                int quantityAdded = p.getBoughtQuantity() - pInCurrentCheck.getBoughtQuantity();
                 if (quantityAdded > 0 && actualProduct.getQuantityOnStock() < quantityAdded) {
-                    unavailableProducts.add(p);
+                    addToUnavailable = true;
+                    quantity = pInCurrentCheck.getBoughtQuantity();
                 }
             } else {
                 actualProduct = productService.findById(p.getId());
                 if (actualProduct.getQuantityOnStock() < p.getBoughtQuantity()) {
-                    unavailableProducts.add(p);
+                    addToUnavailable = true;
                 }
+            }
+
+            if (addToUnavailable) {
+                Product notEnoughProduct = new Product.Builder()
+                        .id(actualProduct.getId())
+                        .title(actualProduct.getTitle())
+                        .code(actualProduct.getCode())
+                        .price(actualProduct.getPrice())
+                        .quantityType(actualProduct.getQuantityType())
+                        .quantityOnStock(actualProduct.getQuantityOnStock())
+                        .boughtQuantity(quantity)
+                        .image(actualProduct.getImage())
+                        .build();
+
+                unavailableProducts.add(notEnoughProduct);
             }
         }
 

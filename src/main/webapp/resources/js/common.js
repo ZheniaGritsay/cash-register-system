@@ -65,6 +65,7 @@ const saveEmployee = (event) => {
         if (data.errors === undefined) {
             window.location.href = '/app/employees/view';
         } else {
+            allMessages = data.messages;
             let formContent = $('.add-form-content').get(0);
             formContent.innerHTML = '';
             renderEntity(data, 'form');
@@ -98,6 +99,15 @@ const saveCheck = (event) => {
         if (data.errors === undefined) {
             window.location.href = '/app/checks/view';
         } else {
+            allMessages = data.messages;
+
+            let dataCheck = data.check;
+            dataCheck.products.forEach(p => {
+                let unvPr = data.unavailableProducts.filter(up => up.id === p.id);
+                if (unvPr[0])
+                    p.quantityOnStock = unvPr[0].quantityOnStock;
+            });
+            check = dataCheck;
 
             let formContent = $('.add-form-content').get(0);
             formContent.innerHTML = '';
@@ -170,6 +180,7 @@ const saveProduct = (event) => {
             if (data.errors === undefined) {
                 window.location.href = '/app/products/view';
             } else {
+                allMessages = data.messages;
                 let formContent = $('.add-form-content').get(0);
                 formContent.innerHTML = '';
                 productForm(data.product, data.messages, formContent, data.errors);
@@ -202,6 +213,7 @@ const saveReport = (event) => {
         if (data.errors === undefined) {
             window.location.href = '/app/reports/view';
         } else {
+            allMessages = data.messages;
             let formContent = $('.add-form-content').get(0);
             formContent.innerHTML = '';
             let div = $('.add-form').get(0).parentElement.nextElementSibling;
@@ -542,6 +554,9 @@ const addToHandler = (event) => {
 
         product.id = Number.parseInt(elem.querySelector('input[name="id"]').value);
         let quantity = elem.querySelector('input[name="quantity"]').value;
+        if (quantity !== '' && Number.parseInt(quantity) <= 0)
+            return;
+
         quantity = quantity === '' ? 1 : Number.parseInt(quantity);
 
         $.ajax(`/app/products/${product.id}`, {method: 'GET'}).done((data) => {
@@ -914,8 +929,15 @@ const deleteEntityHandler = (event) => {
                 window.location.href = `/app/${entity}/view`;
             }
         }).fail(function (jqXHR) {
-        let html = document.getElementsByTagName('HTML')[0];
-        html.innerHTML = jqXHR.responseText;
+        if (entity === 'checks' && jqXHR.status === 500) {
+            let restrictionModal = $('#restriction').get(0);
+            let mBody = restrictionModal.querySelector('.modal-body');
+            mBody.textContent = allMessages.checkRestriction;
+            $(restrictionModal).modal('toggle');
+        } else {
+            let html = document.getElementsByTagName('HTML')[0];
+            html.innerHTML = jqXHR.responseText;
+        }
     });
 };
 
@@ -937,6 +959,10 @@ const closeCheckHandler = () => {
         if (data.errors === undefined) {
             let modal = $('#checkClosed').get(0);
             modal.querySelector('.modal-body').textContent = allMessages.sum + ': ' + check.sum;
+            $(modal).off('hidden.bs.modal').on('hidden.bs.modal',
+                () => {
+                    window.location.href = '/app/home'
+                });
             $(modal).modal('toggle');
         } else {
             let productUnavailableModal = $('#productUnavailable').get(0);
@@ -1133,7 +1159,7 @@ const productsTable = (products, messages, htmlElem) => {
         <tr>
             <th>${messages.title}</th>
             <th>${messages.code}</th>
-            <th>${messages.price}</th>
+            <th>${messages.price} USD</th>
             <th>${messages.quantityType}</th>
             <th>${messages.quantityOnStock}</th>
             <th>${messages.edit}</th>
@@ -1179,7 +1205,7 @@ const checkProductsTable = (products, messages, htmlElem) => {
         <tr>
             <th>${messages.title}</th>
             <th>${messages.code}</th>
-            <th>${messages.price}</th>
+            <th>${messages.price} USD</th>
             <th>${messages.quantityType}</th>
             <th>${messages.boughtQuantity}</th>
             <th>${messages.quantityOnStock}</th>           
@@ -1282,7 +1308,7 @@ const productForm = (product, messages, htmlElem, errors) => {
         </div>
         <div class="form-group">
             <span style="color: red; display: ${errors !== undefined ? errors.price !== undefined ? 'inline' : 'none' : 'none'}">${errors !== undefined ? errors.price : ''}</span>
-            <label for="price">${messages.price}</label>
+            <label for="price">${messages.price} USD</label>
             <input type="text" class="form-control" name="price" id="price" value="${product !== undefined ? product.price : ''}">
         </div>
         <div class="form-group">
@@ -1337,9 +1363,13 @@ const productCard = (product, messages, htmlElem) => {
                 <label class="col-sm-4" for="quantity">${messages.quantity}</label>
                 <input type="number" class="form-control col-sm-8" id="quantity" name="quantity" placeholder="0">
             </div>
-            <div class="form-row">
-                <label class="col-sm-4" for="price">${messages.price}</label>
+            <div class="form-row mb-md-2">
+                <label class="col-sm-4" for="price">${messages.price} USD</label>
                 <input type="number" class="form-control col-sm-8" id="price" name="price" value="${product.price}" disabled>
+            </div>
+            <div class="form-row">
+                <label class="col-sm-4" for="quantityT">${messages.quantityType}</label>
+                <input type="text" class="form-control col-sm-8" id="quantityT" name="quantityT" value="${product.quantityType}" disabled>
             </div>
         </form>
         <input type="hidden" name="id" id="id" value="${product.id}">
@@ -1627,8 +1657,7 @@ const employeesTable = (employees, messages, htmlElem) => {
             <th>${messages.email}</th>
             <th>${messages.salary}</th>
             <th>${messages.position}</th>
-            <th>${messages.edit}</th>
-            <th>${messages.delete}</th>
+            <th>${messages.edit}</th>           
         </tr>
     `);
 
@@ -1645,12 +1674,7 @@ const employeesTable = (employees, messages, htmlElem) => {
                     <button class="btn btn-outline-info add-form">
                         <i class="fa fa-edit"></i> ${messages.edit}
                     </button>
-                </td>
-                <td>
-                    <button class="btn btn-outline-danger delete">
-                        <i class="fa fa-trash"></i> ${messages.delete}
-                    </button>
-                </td>
+                </td>              
                 <input type="hidden" id="id" name="id" value="${employees[i].id}">
             </tr>
         `);
@@ -1721,8 +1745,7 @@ const usersTable = (users, messages, htmlElem) => {
         <tr>
             <th>${messages.login}</th>
             <th>${messages.role}</th>
-            <th>${messages.employee}</th>           
-            <th>${messages.edit}</th>
+            <th>${messages.employee}</th>                       
             <th>${messages.delete}</th>
         </tr>
     `);
@@ -1733,12 +1756,7 @@ const usersTable = (users, messages, htmlElem) => {
             <tr>
                 <td>${users[i].login}</td>
                 <td>${users[i].role}</td>
-                <td>${users[i].employee.firstName} ${users[i].employee.lastName}</td>               
-                <td>
-                    <button class="btn btn-outline-info add-form">
-                        <i class="fa fa-edit"></i> ${messages.edit}
-                    </button>
-                </td>
+                <td>${users[i].employee.firstName} ${users[i].employee.lastName}</td>                               
                 <td>
                     <button class="btn btn-outline-danger delete">
                         <i class="fa fa-trash"></i> ${messages.delete}

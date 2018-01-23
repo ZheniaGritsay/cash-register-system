@@ -12,7 +12,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit</title>
-    <%@include file="parts/header.jspf"%>
+    <%@include file="parts/header.jspf" %>
     <style>
         .card {
             border-color: #28a745;
@@ -40,7 +40,8 @@
             <div>
                 <form class="form-inline">
                     <div class="input-group">
-                        <label for="recordsPerPage"><fmt:message key="label.records.per.page" bundle="${bundle}"/></label>
+                        <label for="recordsPerPage"><fmt:message key="label.records.per.page"
+                                                                 bundle="${bundle}"/></label>
                         <select id="recordsPerPage" name="recordsPerPage" class="form-control-sm ml-md-2"
                                 onchange="submit()">
                             <option value="5" ${recordsPerPage == 5 ? 'selected' : ''} selected>5</option>
@@ -66,7 +67,8 @@
                 <c:if test="${entity eq 'reports'}">
                     <form class="form-inline">
                         <div class="input-group">
-                            <label for="reportTypeSearch"><fmt:message key="label.report.type" bundle="${bundle}"/></label>
+                            <label for="reportTypeSearch"><fmt:message key="label.report.type"
+                                                                       bundle="${bundle}"/></label>
                             <select id="reportTypeSearch" class="form-control-sm ml-md-2"
                                     onchange="onReportTypeChange(event)">
                                 <option value="ALL" selected>all</option>
@@ -79,9 +81,11 @@
                     </form>
                 </c:if>
             </div>
-            <button class="btn btn-outline-success add-form" style="margin-bottom: 10px">
-                <i class="fa fa-plus-circle"></i> <fmt:message key="button.add" bundle="${bundle}"/>
-            </button>
+            <c:if test="${entity != 'users'}">
+                <button class="btn btn-outline-success add-form" style="margin-bottom: 10px">
+                    <i class="fa fa-plus-circle"></i> <fmt:message key="button.add" bundle="${bundle}"/>
+                </button>
+            </c:if>
             <div class="card add-form-content" style="display: none">
             </div>
         </div>
@@ -122,11 +126,13 @@
     </div>
 </div>
 <%@include file="parts/footer.jspf" %>
-<div class="modal fade" id="productUnavailable" tabindex="-1" role="dialog" aria-labelledby="productUnavailableLabel" aria-hidden="true">
+<div class="modal fade" id="productUnavailable" tabindex="-1" role="dialog" aria-labelledby="productUnavailableLabel"
+     aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" style="color: red"><fmt:message key="label.unavailable" bundle="${bundle}"/></h5>
+                <h5 class="modal-title" style="color: red"><fmt:message key="label.unavailable"
+                                                                        bundle="${bundle}"/></h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -134,7 +140,27 @@
             <div class="modal-body" style="color: red">
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal"><fmt:message key="label.close" bundle="${bundle}"/></button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal"><fmt:message key="label.close"
+                                                                                                bundle="${bundle}"/></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="restriction" tabindex="-1" role="dialog" aria-labelledby="restrictionLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color: red"><fmt:message key="label.error" bundle="${bundle}"/></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="color: red">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal"><fmt:message key="label.close"
+                                                                                                bundle="${bundle}"/></button>
             </div>
         </div>
     </div>

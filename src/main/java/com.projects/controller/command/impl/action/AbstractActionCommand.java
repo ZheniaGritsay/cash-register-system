@@ -170,6 +170,7 @@ public abstract class AbstractActionCommand<T extends Entity> implements Command
         messages.put("closeCheck", Internationalization.getText("label.close.check"));
         messages.put("noResults", Internationalization.getText("label.no.results"));
         messages.put("unavailable", Internationalization.getText("label.unavailable"));
+        messages.put("error", Internationalization.getText("label.error"));
 
         return messages;
     }
